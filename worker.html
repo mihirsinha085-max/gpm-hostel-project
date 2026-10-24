@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Worker Maintenance Console — GP Munger</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Arial, sans-serif; }
+    body { background: #f1f5f9; min-height: 100vh; color: #1e293b; display: flex; flex-direction: column; }
+
+    /* Top Inspection Strip - HIDDEN BY DEFAULT */
+    #principal-inspection-strip {
+      display: none;
+      background: linear-gradient(90deg, #0a192f 0%, #1e3a8a 100%);
+      color: #facc15;
+      padding: 9px 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #ca8a04;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    header { background: #0f172a; color: #fff; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #f59e0b; flex-wrap: wrap; gap: 10px; }
+    .worker-brand { font-size: 1.05rem; font-weight: 700; color: #f59e0b; display: flex; align-items: center; gap: 8px; }
+    .worker-sub { font-size: 0.76rem; color: #94a3b8; }
+    .header-btns { display: flex; align-items: center; gap: 10px; }
+    .home-link { color: #cbd5e1; text-decoration: none; font-size: 0.82rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+    .home-link:hover { color: #fff; text-decoration: underline; }
+
+    .wrap { max-width: 1140px; margin: 20px auto; padding: 0 12px; width: 100%; flex: 1; }
+
+    .panel { background: #fff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 18px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+    .panel-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
+    .panel-head h3 { font-size: 1rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px; }
+
+    .task-card {
+      border: 1px solid #cbd5e1; border-left: 4px solid #f59e0b; border-radius: 8px; padding: 14px; margin-bottom: 12px; background: #f8fafc;
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; flex-wrap: wrap;
+    }
+    .task-card.completed { border-left-color: #16a34a; background: #fff; }
+
+    .task-meta { flex: 1; min-width: 240px; }
+    .task-meta h4 { font-size: 0.95rem; color: #0f172a; margin-bottom: 4px; }
+    .task-meta p { font-size: 0.82rem; color: #475569; margin-bottom: 4px; word-break: break-word; }
+    .badge-loc { background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 0.72rem; }
+
+    .proof-box { width: 90px; height: 70px; object-fit: cover; border-radius: 6px; border: 1px solid #cbd5e1; cursor: pointer; }
+
+    .btn-resolve { background: #16a34a; color: #fff; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.82rem; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-resolve:hover { background: #15803d; }
+
+    /* Modal for After-Proof Camera */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 12px; }
+    .modal-box { background: #fff; border-radius: 12px; padding: 20px; max-width: 480px; width: 100%; text-align: center; }
+    .camera-live { width: 100%; height: 220px; background: #000; border-radius: 8px; object-fit: cover; }
+    .captured-output { width: 100%; height: 220px; border-radius: 8px; object-fit: contain; border: 1px solid #cbd5e1; }
+    .hidden { display: none !important; }
+
+    @media (max-width: 640px) {
+      header { padding: 12px 16px; }
+      .wrap { padding: 0 8px; margin: 12px auto; }
+      .panel { padding: 14px; }
+      .task-card { padding: 12px; gap: 10px; }
+      .proof-box { width: 75px; height: 60px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- FLOATING INSPECTION BANNER -->
+  <div id="principal-inspection-strip">
+    <div style="display:flex; align-items:center; gap:6px;">
+      <i class="fa-solid fa-crown"></i>
+      <span>Executive Inspection Mode &bull; Principal Desk</span>
+    </div>
+    <a href="principal.html" style="background:#facc15; color:#0a192f; text-decoration:none; padding:4px 10px; border-radius:5px; font-weight:800; font-size:0.75rem; display:inline-flex; align-items:center; gap:4px;">
+      <i class="fa-solid fa-arrow-left"></i> Return
+    </a>
+  </div>
+
+  <header>
+    <div>
+      <div class="worker-brand"><i class="fa-solid fa-wrench"></i> GP Munger — Maintenance Field Console</div>
+      <div class="worker-sub" id="w-header-name">Worker Desk</div>
+    </div>
+    <div class="header-btns">
+      <a href="index.html" class="home-link"><i class="fa-solid fa-house"></i> Home</a>
+      <button onclick="sessionStorage.removeItem('gpm_worker'); window.location.href='worker_login.html'" style="background:#dc2626; color:#fff; border:none; padding:6px 12px; border-radius:6px; font-weight:700; cursor:pointer; font-size:0.8rem;">Sign Out</button>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <!-- PENDING TASKS -->
+    <div class="panel">
+      <div class="panel-head">
+        <h3><i class="fa-solid fa-bolt" style="color:#f59e0b;"></i> Assigned Tasks (<span id="count-pending">0</span> Pending)</h3>
+        <button onclick="loadTasks()" style="padding:6px 12px; border:1px solid #cbd5e1; background:#fff; border-radius:6px; cursor:pointer; font-weight:600; font-size:0.8rem;"><i class="fa-solid fa-arrows-rotate"></i> Refresh</button>
+      </div>
+      <div id="list-pending">Loading tasks...</div>
+    </div>
+
+    <!-- RESOLVED & PAST RECORDS -->
+    <div class="panel">
+      <div class="panel-head">
+        <h3><i class="fa-solid fa-square-check" style="color:#16a34a;"></i> Completed History &amp; Student Feedback</h3>
+      </div>
+      <div id="list-completed">Loading history...</div>
+    </div>
+  </div>
+
+  <!-- MODAL: CAMERA RESOLUTION PROOF -->
+  <div id="modal-after-proof" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-weight:700; font-size:1rem;">
+        <span>Snap After-Work Completion Proof</span>
+        <button onclick="closeProofModal()" style="border:none; background:transparent; font-size:1.3rem; cursor:pointer;">&times;</button>
+      </div>
+
+      <video id="w-camera" autoplay playsinline muted class="camera-live"></video>
+      <canvas id="w-canvas" class="hidden"></canvas>
+      <img id="w-photo-preview" class="captured-output hidden">
+
+      <div style="display:flex; gap:8px; justify-content:center; margin:10px 0; flex-wrap:wrap;">
+        <button type="button" style="background:#0284c7; color:#fff; border:none; padding:7px 12px; border-radius:6px; font-weight:700; cursor:pointer; font-size:0.8rem;" onclick="switchWorkerCamera()">
+          <i class="fa-solid fa-arrows-rotate"></i> Flip Camera
+        </button>
+        <button type="button" style="background:#f59e0b; color:#0f172a; border:none; padding:7px 14px; border-radius:6px; font-weight:800; cursor:pointer; font-size:0.8rem;" onclick="snapWorkerProof()" id="btn-snap-proof">
+          <i class="fa-solid fa-camera"></i> Snap After Photo
+        </button>
+      </div>
+
+      <textarea id="work-notes" placeholder="Enter work notes..." style="width:100%; padding:9px; border:1px solid #cbd5e1; border-radius:6px; margin-bottom:10px; font-size:0.82rem; outline:none;" rows="2"></textarea>
+
+      <button type="button" class="btn-resolve" style="width:100%; padding:10px; justify-content:center;" onclick="submitResolution()">
+        Mark as Resolved &amp; Submit Proof
+      </button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    const currentWorker = JSON.parse(sessionStorage.getItem('gpm_worker') || 'null');
+    if (!currentWorker) { window.location.href = 'worker_login.html'; }
+
+    const isPrincipalInspecting = sessionStorage.getItem('gpm_principal') && sessionStorage.getItem('gpm_inspection_active') === 'true';
+    if (isPrincipalInspecting) {
+      const pStrip = document.getElementById('principal-inspection-strip');
+      if (pStrip) pStrip.style.display = 'flex';
+    }
+
+    document.getElementById('w-header-name').innerText = `${currentWorker.name} • ${currentWorker.trade}`;
+
+    let activeTicketId = null;
+    let workerStream = null;
+    let workerFacingMode = 'environment';
+    let workerProofBase64 = null;
+
+    async function loadTasks() {
+      const res = await sendRequest(`/worker/my-tasks?worker_id=${encodeURIComponent(currentWorker.id)}`);
+      if (!res.ok) return;
+
+      const { pending, completed } = res.data;
+      document.getElementById('count-pending').innerText = pending.length;
+
+      const pContainer = document.getElementById('list-pending');
+      pContainer.innerHTML = '';
+      if (pending.length === 0) {
+        pContainer.innerHTML = '<p style="color:#64748b; font-size:0.85rem; padding:10px 0;">No pending tasks assigned right now! All clear.</p>';
+      } else {
+        pending.forEach(t => {
+          let beforeProof = t.photo_base64 
+            ? `<img src="${t.photo_base64}" class="proof-box" onclick="window.open('${t.photo_base64}')">` 
+            : '<span style="color:#94a3b8; font-size:0.75rem;">No Photo</span>';
+
+          pContainer.innerHTML += `
+            <div class="task-card">
+              <div class="task-meta">
+                <h4>${t.category} <span class="badge-loc">${(t.hostel_wing || 'Boys').toUpperCase()} | Room: ${t.room}</span></h4>
+                <p><strong>Student:</strong> ${t.name} (${t.roll})</p>
+                <p><strong>Problem:</strong> ${t.description}</p>
+                <small style="color:#64748b;">Assigned On: ${t.assigned_at || t.timestamp}</small>
+              </div>
+              <div style="text-align:center;">
+                ${beforeProof}<br>
+                <button class="btn-resolve" style="margin-top:6px;" onclick="openProofModal('${t.ticket_id}')">
+                  <i class="fa-solid fa-check-double"></i> Complete Work
+                </button>
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      const cContainer = document.getElementById('list-completed');
+      cContainer.innerHTML = '';
+      if (completed.length === 0) {
+        cContainer.innerHTML = '<p style="color:#64748b; font-size:0.85rem; padding:10px 0;">No completed tasks yet.</p>';
+      } else {
+        completed.forEach(t => {
+          let fbHtml = '<span style="color:#94a3b8; font-size:0.78rem;">Awaiting student feedback...</span>';
+          if (t.feedback) {
+            const stars = '★'.repeat(t.feedback.rating) + '☆'.repeat(5 - t.feedback.rating);
+            fbHtml = `
+              <div style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:6px; padding:6px 10px; margin-top:6px;">
+                <span style="color:#eab308; font-weight:800; font-size:0.9rem;">${stars}</span>
+                <span style="font-weight:700; color:#166534; font-size:0.82rem; margin-left:6px;">"${t.feedback.review}"</span>
+              </div>
+            `;
+          }
+
+          cContainer.innerHTML += `
+            <div class="task-card completed">
+              <div class="task-meta">
+                <h4>${t.category} <span class="badge-loc">${(t.hostel_wing || 'Boys').toUpperCase()} | Room: ${t.room}</span></h4>
+                <p><strong>Resolved Notes:</strong> ${t.resolved_notes || 'Resolved on site'}</p>
+                <small style="color:#64748b;">Resolved at: ${t.resolved_at}</small>
+                ${fbHtml}
+              </div>
+              <div>
+                ${t.after_proof ? `<img src="${t.after_proof}" class="proof-box" style="border:2px solid #16a34a;" onclick="window.open('${t.after_proof}')">` : ''}
+              </div>
+            </div>
+          `;
+        });
+      }
+    }
+
+    async function openProofModal(ticketId) {
+      activeTicketId = ticketId;
+      document.getElementById('modal-after-proof').classList.remove('hidden');
+      document.getElementById('w-camera').classList.remove('hidden');
+      document.getElementById('w-photo-preview').classList.add('hidden');
+      document.getElementById('work-notes').value = '';
+      workerProofBase64 = null;
+      startWorkerCamera();
+    }
+
+    async function startWorkerCamera() {
+      if (workerStream) workerStream.getTracks().forEach(t => t.stop());
+      try {
+        workerStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: workerFacingMode }, width: { ideal: 1280 } }
+        });
+        document.getElementById('w-camera').srcObject = workerStream;
+      } catch (e) {
+        alert("Camera Error: Please allow camera permissions.");
+      }
+    }
+
+    function switchWorkerCamera() {
+      workerFacingMode = (workerFacingMode === 'user') ? 'environment' : 'user';
+      startWorkerCamera();
+    }
+
+    function snapWorkerProof() {
+      const vid = document.getElementById('w-camera');
+      const canvas = document.getElementById('w-canvas');
+      canvas.width = vid.videoWidth || 640;
+      canvas.height = vid.videoHeight || 480;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(vid, 0, 0, canvas.width, canvas.height);
+
+      const timeStr = new Date().toLocaleString('en-IN');
+      ctx.fillStyle = 'rgba(0,0,0,0.6)';
+      ctx.fillRect(0, canvas.height - 35, canvas.width, 35);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 14px Arial';
+      ctx.fillText(`WORK RESOLVED | ${currentWorker.name} | ${timeStr}`, 14, canvas.height - 12);
+
+      workerProofBase64 = canvas.toDataURL('image/jpeg', 0.85);
+      const preview = document.getElementById('w-photo-preview');
+      preview.src = workerProofBase64;
+      preview.classList.remove('hidden');
+      vid.classList.add('hidden');
+    }
+
+    async function submitResolution() {
+      if (!workerProofBase64) {
+        alert("Please snap an After-Work photo as proof!");
+        return;
+      }
+      const notes = document.getElementById('work-notes').value.trim();
+      const res = await sendRequest('/worker/complete-task', 'POST', {
+        ticket_id: activeTicketId,
+        after_proof: workerProofBase64,
+        work_notes: notes || "Work completed and verified on site."
+      });
+
+      if (res.ok) {
+        alert("Task marked as Resolved!");
+        closeProofModal();
+        loadTasks();
+      } else {
+        alert(res.data.message || "Failed to update task.");
+      }
+    }
+
+    function closeProofModal() {
+      document.getElementById('modal-after-proof').classList.add('hidden');
+      if (workerStream) {
+        workerStream.getTracks().forEach(t => t.stop());
+        workerStream = null;
+      }
+    }
+
+    loadTasks();
+  </script>
+</body>
+</html>

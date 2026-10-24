@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Academic Dashboard — GP Munger</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', sans-serif; }
+    body { background: #f8fafc; min-height: 100vh; display: flex; flex-direction: column; color: #1e293b; }
+
+    header { background: #0a192f; color: #fff; padding: 16px 36px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #38bdf8; }
+    .brand { font-size: 1.15rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+    .brand i { color: #38bdf8; }
+    .logout-btn { background: #ef4444; color: #fff; border: none; padding: 7px 14px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.82rem; }
+
+    .wrap { max-width: 1200px; margin: 30px auto; padding: 0 20px; width: 100%; flex: 1; }
+    .card { background: #fff; border-radius: 12px; border: 1px solid #cbd5e1; padding: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 24px; }
+    h2 { font-size: 1.2rem; color: #0f172a; margin-bottom: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
+    th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+    th { background: #f1f5f9; color: #475569; font-weight: 800; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.5px; }
+    tr:hover { background: #f8fafc; }
+
+    .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
+    .badge-rep { background: #fef3c7; color: #b45309; }
+    .badge-res { background: #dcfce7; color: #15803d; }
+
+    .btn-action { background: #0a192f; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.75rem; }
+    .btn-action:hover { background: #1e293b; }
+
+    .proof-thumb { width: 48px; height: 48px; border-radius: 6px; object-fit: cover; border: 1px solid #cbd5e1; cursor: pointer; transition: transform 0.2s; }
+    .proof-thumb:hover { transform: scale(1.08); border-color: #38bdf8; }
+    .empty-state { text-align: center; padding: 30px; color: #64748b; font-size: 0.88rem; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand"><i class="fa-solid fa-graduation-cap"></i> <span id="staff-title-bar">Academic Portal</span> — GP Munger</div>
+    <button class="logout-btn" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+  </header>
+
+  <div class="wrap">
+    <div class="card">
+      <h2><i class="fa-solid fa-clipboard-list" style="color:#0284c7;"></i> Academic Section Grievances &amp; Reports</h2>
+      <p style="font-size:0.84rem; color:#64748b; margin-bottom:14px;">Review all academic complaints raised by students with Roll Number, Name, Location, and Photo proof.</p>
+
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Ticket ID &amp; Date</th>
+              <th>Student Details (Roll &amp; Name)</th>
+              <th>Sector &amp; Location</th>
+              <th>Issue Category</th>
+              <th>Description</th>
+              <th>Photo Proof</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="grievances-table-body">
+            <!-- Populated via JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Photo Preview Modal -->
+  <div id="photo-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center; padding:20px;">
+    <div style="background:#fff; padding:20px; border-radius:10px; max-width:640px; width:100%; text-align:center; position:relative; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+      <button onclick="closePhotoModal()" style="position:absolute; top:10px; right:15px; border:none; background:#ef4444; color:#fff; width:30px; height:30px; border-radius:50%; font-size:1.1rem; cursor:pointer; font-weight:bold; display:flex; align-items:center; justify-content:center;">&times;</button>
+      <h3 style="margin-bottom:12px; font-size:1.1rem; color:#0f172a;"><i class="fa-solid fa-camera"></i> Watermarked Evidence Proof</h3>
+      <img id="modal-img-tag" src="" style="width:100%; max-height:480px; object-fit:contain; border-radius:6px; border:1px solid #cbd5e1; background:#000;">
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    const user = JSON.parse(sessionStorage.getItem('gpm_academic_staff') || '{}');
+    if (!user.id) {
+      window.location.href = 'academic_login.html';
+    } else {
+      document.getElementById('staff-title-bar').innerText = `${user.name} (${user.role})`;
+    }
+
+    function openPhotoModal(url) {
+      if (!url) return;
+      document.getElementById('modal-img-tag').src = url;
+      document.getElementById('photo-modal').style.display = 'flex';
+    }
+
+    function closePhotoModal() {
+      document.getElementById('photo-modal').style.display = 'none';
+    }
+
+    async function loadGrievances() {
+      // Updated to fetch only academic grievances
+      const res = await sendRequest('/academic/grievances');
+      if (res.ok) {
+        const tbody = document.getElementById('grievances-table-body');
+        tbody.innerHTML = '';
+        const list = res.data.grievances || [];
+
+        if (list.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8" class="empty-state">No academic grievances reported yet.</td></tr>`;
+          return;
+        }
+
+        list.forEach(g => {
+          const isResolved = g.status === 'Resolved';
+          tbody.innerHTML += `
+            <tr>
+              <td><strong>${g.ticket_id}</strong><br><span style="font-size:0.72rem; color:#64748b;">${g.timestamp}</span></td>
+              <td><strong>${g.roll || 'N/A'}</strong><br><span style="font-size:0.78rem; color:#334155;">${g.name || 'Anonymous'}</span></td>
+              <td><span style="font-weight:700; color:#0284c7;">${g.category_type}</span><br><span style="font-size:0.75rem; color:#475569;">${g.location}</span></td>
+              <td><strong>${g.issue}</strong></td>
+              <td style="max-width:200px; font-size:0.8rem; color:#334155;">${g.description}</td>
+              <td>
+                ${g.photo_base64 ? `<img src="${g.photo_base64}" class="proof-thumb" onclick="openPhotoModal('${g.photo_base64}')" title="Click to enlarge photo">` : '<span style="color:#94a3b8; font-size:0.75rem;">No Photo</span>'}
+              </td>
+              <td>
+                <span class="badge ${isResolved ? 'badge-res' : 'badge-rep'}">${g.status}</span>
+                ${isResolved ? `<br><span style="font-size:0.68rem; color:#15803d;">${g.resolved_at || ''}</span>` : ''}
+              </td>
+              <td>
+                ${!isResolved ? `<button class="btn-action" onclick="resolveTicket('${g.ticket_id}')">Resolve</button>` : `<span style="font-size:0.75rem; color:#16a34a; font-weight:700;"><i class="fa-solid fa-check"></i> Closed</span>`}
+              </td>
+            </tr>
+          `;
+        });
+      }
+    }
+
+    async function resolveTicket(ticketId) {
+      const notes = prompt("Enter resolution notes / remarks:", "Resolved and verified by Academic Incharge.");
+      if (notes === null) return;
+
+      const res = await sendRequest('/campus/resolve-grievance', 'POST', { ticket_id: ticketId, resolved_notes: notes });
+      if (res.ok) {
+        alert("Academic grievance marked as resolved successfully!");
+        loadGrievances();
+      } else {
+        alert("Failed to resolve ticket.");
+      }
+    }
+
+    function logout() {
+      sessionStorage.removeItem('gpm_academic_staff');
+      window.location.href = 'index.html';
+    }
+
+    loadGrievances();
+  </script>
+</body>
+</html>

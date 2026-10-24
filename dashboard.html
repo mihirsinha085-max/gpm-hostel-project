@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Resident Portal - Government Polytechnic, Munger</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    :root {
+      --navy-dark: #0d1e38;
+      --navy-bar: #08172c;
+      --gold: #d4a34b;
+      --border-gray: #e2e8f0;
+      --text-muted: #64748b;
+      --stat-box-bg: #0d1e38;
+      --danger: #dc2626;
+      --success: #16a34a;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+    body { background: #f8fafc; min-height: 100vh; display: flex; flex-direction: column; color: #1e293b; }
+
+    .brand-header {
+      background: var(--navy-dark);
+      padding: 16px 48px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .inst-seal {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 2px solid var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--navy-dark);
+      font-size: 1.6rem;
+    }
+    .inst-titles h1 { font-size: 1.35rem; color: var(--gold); font-family: Georgia, serif; font-weight: 700; }
+    .inst-titles .inst-loc { font-size: 0.78rem; color: #9ab4d0; }
+    .inst-titles .inst-tag { font-size: 0.78rem; color: var(--gold); font-weight: 700; letter-spacing: 0.8px; margin-top: 2px; }
+
+    .nav-bar {
+      background: var(--navy-bar);
+      border-top: 2px solid #b68533;
+      padding: 10px 48px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 20px;
+    }
+    .nav-bar a { color: #cbd7e6; text-decoration: none; font-size: 0.85rem; font-weight: 600; padding: 6px 14px; border-radius: 4px; }
+    .nav-bar a.active { background: #172d4d; color: #ffffff; }
+
+    .dashboard-container { max-width: 980px; margin: 32px auto; padding: 0 16px; width: 100%; flex: 1; }
+
+    .user-card {
+      background: #ffffff;
+      border-radius: 16px;
+      border: 1px solid var(--border-gray);
+      padding: 24px 28px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+      margin-bottom: 24px;
+    }
+    .user-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .user-info-left { display: flex; align-items: center; gap: 16px; }
+    .user-avatar-circle {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: var(--navy-dark);
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .user-name-block h2 { font-size: 1.35rem; font-family: Georgia, serif; color: #0f172a; font-weight: 700; }
+    .user-name-block p { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; margin-top: 2px; }
+
+    .user-actions-right { display: flex; align-items: center; gap: 10px; }
+    .badge-status { padding: 5px 14px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; }
+    .status-approved { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+    .status-pending { background: #fefce8; color: #ca8a04; border: 1px solid #fde047; }
+    .btn-pwd-pill {
+      background: #0d1e38;
+      color: #ffffff;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-pwd-pill:hover { background: #172d4d; }
+    .btn-logout-pill {
+      background: #ffffff;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+      padding: 5px 16px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-logout-pill:hover { background: #f1f5f9; }
+
+    .stat-matrix { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .stat-box { background: var(--stat-box-bg); border-radius: 10px; padding: 16px 12px; text-align: center; color: #ffffff; }
+    .stat-box-title { font-size: 0.72rem; color: #94a3b8; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 6px; }
+    .stat-box-val { font-size: 1.35rem; font-weight: 700; }
+
+    .details-card {
+      background: #ffffff;
+      border-radius: 16px;
+      border: 1px solid var(--border-gray);
+      padding: 28px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    }
+
+    .detail-pills { display: flex; gap: 10px; margin-bottom: 28px; flex-wrap: wrap; }
+    .detail-pill {
+      border: 1px solid #e2e8f0;
+      background: #ffffff;
+      color: var(--text-muted);
+      padding: 7px 18px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .detail-pill.active { background: var(--navy-dark); color: #ffffff; border-color: var(--navy-dark); }
+    .detail-pill.pill-gold { border-color: var(--gold); color: #b45309; font-weight: 700; }
+    .detail-pill.pill-gold.active { background: var(--navy-dark); color: #fef08a; border-color: var(--gold); }
+
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    .profile-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px 32px; }
+    .info-field-group { display: flex; flex-direction: column; gap: 4px; }
+    .info-field-label { font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .info-field-val { font-size: 0.95rem; color: #1e293b; font-weight: 500; line-height: 1.45; }
+    .divider { height: 1px; background: #f1f5f9; margin: 28px 0 24px; }
+
+    .media-preview-row { display: flex; gap: 28px; align-items: flex-start; margin-bottom: 28px; }
+    .media-thumb-wrap { width: 120px; height: 140px; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px; background: #ffffff; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .media-thumb-wrap.signature-wrap { width: 170px; height: 90px; }
+    .media-thumb-wrap img { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; }
+    .media-box-label { font-size: 0.72rem; color: #64748b; font-weight: 700; text-transform: uppercase; margin-top: 8px; }
+
+    .btn-download-order { background: var(--navy-dark); color: #ffffff; padding: 10px 18px; border-radius: 8px; border: none; font-size: 0.85rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+
+    .section-title { font-family: Georgia, serif; font-size: 1.15rem; color: #0d1e38; margin-bottom: 12px; }
+    .callout-box { border-radius: 8px; padding: 14px 18px; font-size: 0.88rem; margin-bottom: 24px; display: flex; align-items: center; gap: 10px; }
+    .callout-green { background: #eefdf4; border-left: 4px solid #16a34a; color: #166534; }
+    .callout-blue { background: #f0f6fe; border-left: 4px solid #2563eb; color: #1e40af; }
+    .callout-gold { background: #fefce8; border-left: 4px solid #ca8a04; color: #854d0e; }
+
+    .table-receipt { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin-bottom: 28px; }
+    .table-receipt th { text-align: left; padding: 12px 14px; background: #f8fafc; color: #64748b; font-weight: 700; text-transform: uppercase; font-size: 0.75rem; border-bottom: 1px solid #e2e8f0; }
+    .table-receipt td { padding: 16px 14px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+
+    .form-label { display: block; font-size: 0.78rem; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .form-label span { color: #dc2626; }
+    .input-clean { width: 100%; padding: 11px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; outline: none; background: #ffffff; color: #1e293b; }
+    .form-group-mb { margin-bottom: 20px; }
+    .grid-2-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    .btn-submit-main { background: var(--navy-dark); color: #ffffff; padding: 12px 24px; border-radius: 8px; border: none; font-size: 0.95rem; font-weight: 700; cursor: pointer; }
+    .btn-submit-main:hover { background: #172d4d; }
+
+    .leave-history-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 14px; }
+    .leave-history-table th { background: #f8fafc; padding: 10px 12px; text-align: left; border: 1px solid #e2e8f0; }
+    .leave-history-table td { padding: 10px 12px; border: 1px solid #e2e8f0; vertical-align: middle; }
+    .badge-leave-pending { background: #fefce8; color: #ca8a04; border: 1px solid #fde047; padding: 3px 10px; border-radius: 4px; font-weight: 700; font-size: 0.75rem; }
+    .badge-leave-approved { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; padding: 3px 10px; border-radius: 4px; font-weight: 700; font-size: 0.75rem; }
+    .btn-print-pass { background: #0d1e38; color: #ffffff; border: none; padding: 6px 14px; border-radius: 4px; font-size: 0.78rem; font-weight: 600; cursor: pointer; }
+
+    .sensor-grid { display: grid; grid-template-columns: 1fr; gap: 18px; margin: 18px 0; }
+    .sensor-grid.two-col { grid-template-columns: 1fr 1fr; }
+    .sensor-card { border: 1px solid #cbd5e1; border-radius: 8px; padding: 14px; background: #f8fafc; text-align: center; }
+    .camera-preview { width: 100%; height: 210px; background: #000; border-radius: 6px; object-fit: cover; }
+    .captured-output { width: 100%; height: 210px; border-radius: 6px; object-fit: contain; border: 1px solid #cbd5e1; background: #fff; }
+    .btn-ctrl { padding: 7px 14px; border-radius: 4px; border: none; font-size: 0.8rem; font-weight: 700; cursor: pointer; margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-cam { background: var(--navy-dark); color: #fff; }
+    .btn-rec { background: var(--danger); color: #fff; }
+    .btn-stop { background: #475569; color: #fff; }
+    .btn-flip { background: #0284c7; color: #fff; }
+    .db-meter-box { margin-top: 14px; font-weight: 700; font-size: 1.4rem; color: var(--navy-dark); }
+
+    .modal-overlay { position: fixed; inset: 0; background: rgba(13, 30, 56, 0.85); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
+    .modal-box { background: #fff; border-radius: 8px; padding: 24px; max-width: 440px; width: 100%; }
+    .modal-head { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 16px; font-weight: 700; color: var(--navy-dark); }
+    .hidden { display: none !important; }
+
+    .pdf-render-wrapper { position: absolute; left: -9999px; top: 0; width: 790px; background: #ffffff; }
+    .pdf-document { border: 1px solid #475569; padding: 34px 38px; background: #ffffff; color: #000; font-family: Arial, sans-serif; }
+    .pdf-header { display: flex; align-items: center; gap: 16px; border-bottom: 2px solid #000; padding-bottom: 12px; margin-bottom: 12px; }
+    .pdf-logo-circle { width: 62px; height: 62px; border-radius: 50%; border: 2px solid #000; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.72rem; text-align: center; line-height: 1.15; flex-shrink: 0; }
+    .pdf-inst-text { text-align: center; flex: 1; }
+    .pdf-inst-text h2 { font-size: 1.35rem; font-weight: 900; margin-bottom: 2px; }
+    .pdf-doc-title { text-align: center; font-size: 1.18rem; font-weight: 900; margin: 16px 0; }
+    .pdf-meta-row { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; margin-bottom: 10px; }
+    .pdf-section-title { font-size: 0.85rem; font-weight: 900; text-transform: uppercase; margin: 14px 0 6px; }
+    .pdf-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-bottom: 12px; }
+    .pdf-table td { border: 1px solid #000; padding: 6px 10px; text-align: left; }
+    .pdf-table .lbl { background: #fafafa; font-weight: 700; width: 25%; }
+    .pdf-duration-table { width: 100%; border-collapse: collapse; text-align: center; margin-bottom: 10px; font-size: 0.85rem; }
+    .pdf-duration-table th, .pdf-duration-table td { border: 1px solid #000; padding: 6px; text-align: center; }
+    .pdf-subnote { font-size: 0.8rem; font-weight: 700; margin-bottom: 14px; }
+    .pdf-declaration-title { font-size: 0.82rem; font-weight: 700; margin-bottom: 2px; }
+    .pdf-declaration-text { font-size: 0.78rem; line-height: 1.35; margin-bottom: 24px; }
+    .pdf-sign-row { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 18px; padding-top: 10px; }
+    .pdf-sign-box { text-align: center; font-size: 0.82rem; font-weight: 700; }
+    .pdf-sign-box .sig-name { font-family: 'Brush Script MT', cursive, Georgia, serif; font-size: 1.35rem; margin-bottom: 4px; color: #0d1e38; }
+    .warden-stamp-badge { display: inline-block; border: 2px solid #16a34a; border-radius: 50px; color: #16a34a; padding: 6px 18px; font-weight: 900; font-size: 0.85rem; text-transform: uppercase; margin-bottom: 8px; transform: rotate(-3deg); }
+  </style>
+</head>
+<body>
+
+  <div class="brand-header">
+    <div class="inst-seal"><i class="fa-solid fa-graduation-cap"></i></div>
+    <div class="inst-titles">
+      <h1>Government Polytechnic, Munger</h1>
+      <div class="inst-loc">Ramankabad, Haveli Kharagpur, Munger-811213, Bihar</div>
+      <div class="inst-tag"><i class="fa-solid fa-building-columns"></i> HOSTEL MANAGEMENT SYSTEM</div>
+    </div>
+  </div>
+
+  <div class="nav-bar">
+    <a href="index.html">Home</a>
+    <a href="admission.html">New Student</a>
+    <a href="dashboard.html" class="active">Student Login</a>
+    <a href="warden_login.html">Warden</a>
+    <a href="admin_login.html">Admin Office</a>
+  </div>
+
+  <div class="dashboard-container">
+    <div class="user-card">
+      <div class="user-card-top">
+        <div class="user-info-left">
+          <div class="user-avatar-circle" id="u-initials">AK</div>
+          <div class="user-name-block">
+            <h2 id="u-name">Student Name</h2>
+            <p id="u-roll">--</p>
+          </div>
+        </div>
+        <div class="user-actions-right">
+          <span class="badge-status status-approved" id="u-status">Approved</span>
+          <button class="btn-pwd-pill" onclick="openStudentPwdModal()"><i class="fa-solid fa-key"></i> Change Pass</button>
+          <button class="btn-logout-pill" onclick="terminateSession('student', 'login.html')">Logout</button>
+        </div>
+      </div>
+
+      <div class="stat-matrix">
+        <div class="stat-box"><div class="stat-box-title">Hostel</div><div class="stat-box-val" id="u-hostel">--</div></div>
+        <div class="stat-box"><div class="stat-box-title">Room</div><div class="stat-box-val" id="u-room">--</div></div>
+        <div class="stat-box"><div class="stat-box-title">Bed</div><div class="stat-box-val" id="u-bed">--</div></div>
+        <div class="stat-box"><div class="stat-box-title">Table</div><div class="stat-box-val" id="u-table">--</div></div>
+      </div>
+    </div>
+
+    <div class="details-card">
+      <div class="detail-pills">
+        <button class="detail-pill active" id="tab-btn-profile" onclick="switchTab('profile')">Profile</button>
+        <button class="detail-pill" id="tab-btn-dues" onclick="switchTab('dues')">Payments &amp; Dues</button>
+        <button class="detail-pill" id="tab-btn-leave" onclick="switchTab('leave')">Leave</button>
+        <button class="detail-pill pill-gold" id="tab-btn-application" onclick="switchTab('application')"><i class="fa-solid fa-file-signature"></i> Digital Application</button>
+        <button class="detail-pill" id="tab-btn-update" onclick="switchTab('update')">Update</button>
+        <button class="detail-pill" id="tab-btn-grievances" onclick="switchTab('grievances')">Grievances</button>
+      </div>
+
+      <!-- TAB 1: PROFILE -->
+      <div id="pane-profile" class="tab-pane active">
+        <div class="profile-info-grid">
+          <div class="info-field-group"><div class="info-field-label">Date of Birth</div><div class="info-field-val" id="u-dob">--</div></div>
+          <div class="info-field-group"><div class="info-field-label">Email</div><div class="info-field-val" id="u-email">--</div></div>
+          <div class="info-field-group"><div class="info-field-label">Contact</div><div class="info-field-val" id="u-contact">--</div></div>
+          <div class="info-field-group"><div class="info-field-label">Guardian Contact</div><div class="info-field-val" id="u-gcontact">--</div></div>
+          <div class="info-field-group"><div class="info-field-label">Guardian</div><div class="info-field-val" id="u-guardian">--</div></div>
+          <div class="info-field-group"><div class="info-field-label">Admission Session</div><div class="info-field-val" id="u-session">Odd 2026 Session</div></div>
+          <div class="info-field-group"><div class="info-field-label">District / PIN</div><div class="info-field-val" id="u-district">--</div></div>
+          <div class="info-field-group"><div class="info-field-label">Permanent Address</div><div class="info-field-val" id="u-address">--</div></div>
+          <div class="info-field-group"><div class="info-field-label">Submitted</div><div class="info-field-val" id="u-submitted">--</div></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="media-preview-row">
+          <div class="media-box-unit">
+            <div class="media-thumb-wrap"><img id="u-photo" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=160&q=80"></div>
+            <div class="media-box-label">Photo</div>
+          </div>
+          <div class="media-box-unit">
+            <div class="media-thumb-wrap signature-wrap"><img id="u-signature" src="https://dummyimage.com/200x80/ffffff/000000.png&text=Signature"></div>
+            <div class="media-box-label">Signature</div>
+          </div>
+        </div>
+
+        <div style="font-size:0.75rem; color:#64748b; font-weight:700; text-transform:uppercase; margin-bottom:12px;">Your Documents</div>
+        <button class="btn-download-order" onclick="window.print()"><i class="fa-solid fa-file-arrow-down"></i> Download Provisional Allotment Letter</button>
+      </div>
+
+      <!-- TAB 2: PAYMENTS & DUES -->
+      <div id="pane-dues" class="tab-pane">
+        <div class="section-title"><i class="fa-solid fa-triangle-exclamation"></i> Outstanding Dues &amp; Fines</div>
+        
+        <div id="dues-alert-container">
+          <div class="callout-box callout-green">
+            <i class="fa-regular fa-square-check" style="font-size:1.1rem;"></i> No outstanding disciplinary fines. You are clear!
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section-title">Disciplinary Penalty &amp; Fine History</div>
+        <table class="table-receipt">
+          <thead>
+            <tr><th>Penalty Reason / Remarks</th><th>Fine Amount</th><th>Issued Date</th><th>Status</th></tr>
+          </thead>
+          <tbody id="fine-history-rows">
+            <tr><td colspan="4" style="text-align:center; color:#64748b;">No disciplinary penalty recorded.</td></tr>
+          </tbody>
+        </table>
+
+        <div class="divider"></div>
+
+        <div class="section-title">Hostel Admission &amp; Session Fee</div>
+        <table class="table-receipt">
+          <thead>
+            <tr><th>Fee Type</th><th>Amount</th><th>Session</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Hostel Seat Maintenance &amp; Electricity</td>
+              <td><strong>₹4,500</strong></td>
+              <td>Odd 2026 Session</td>
+              <td><span class="badge-status status-approved">Paid / Verified</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- TAB 3: LEAVE -->
+      <div id="pane-leave" class="tab-pane">
+        <div class="section-title">Apply for Hostel Leave</div>
+        <div class="callout-box callout-blue">
+          Maximum <strong>10 days</strong> (inclusive of departure & return days). Must apply at least <strong>24 hours before 6:00 AM of the departure date</strong>.
+        </div>
+
+        <form onsubmit="handleLeaveFormSubmit(event)">
+          <div class="form-group-mb">
+            <label class="form-label">Reason for Leave <span>*</span></label>
+            <select class="input-clean" id="lv-reason" required>
+              <option value="">— Select reason —</option>
+              <option value="Going Home">Going Home</option>
+              <option value="Home / Family Function">Home / Family Function</option>
+              <option value="Medical Emergency / Consultation">Medical Emergency / Consultation</option>
+              <option value="Academic Examination / Training">Academic Examination / Training</option>
+              <option value="Urgent Personal Work">Urgent Personal Work</option>
+            </select>
+          </div>
+
+          <div class="grid-2-col form-group-mb">
+            <div>
+              <label class="form-label">Date of Departure <span>*</span></label>
+              <input type="date" class="input-clean" id="lv-dep-date" required onchange="handleDepartureDateChange()">
+            </div>
+            <div>
+              <label class="form-label">Date of Return <span>*</span></label>
+              <input type="date" class="input-clean" id="lv-ret-date" required onchange="handleReturnDateChange()">
+            </div>
+          </div>
+
+          <div class="form-group-mb">
+            <label class="form-label">Address During Leave <span>*</span></label>
+            <textarea class="input-clean" rows="3" id="lv-address" required placeholder="Full address where you will stay during leave..."></textarea>
+          </div>
+
+          <button type="submit" class="btn-submit-main">Submit Leave Application</button>
+        </form>
+
+        <div class="divider"></div>
+
+        <div class="section-title">Your Leave History &amp; Gate Passes</div>
+        <table class="leave-history-table">
+          <thead>
+            <tr>
+              <th>Ref No.</th>
+              <th>Period</th>
+              <th>Reason</th>
+              <th>Status</th>
+              <th>Official Order</th>
+            </tr>
+          </thead>
+          <tbody id="tbl-my-leaves">
+            <tr><td colspan="5" style="text-align:center; color:#64748b;">Loading your applications...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- TAB: DIGITAL APPLICATION (WITH LIVE REAL-TIME TRACKER & MA'AM'S FEEDBACK) -->
+      <div id="pane-application" class="tab-pane">
+        <div class="section-title"><i class="fa-solid fa-file-pen" style="color:var(--gold); margin-right:6px;"></i> Draft Official Digital Application</div>
+        <div class="callout-box callout-gold">
+          <i class="fa-solid fa-shield-halved" style="font-size:1.15rem;"></i> Direct paperless submission to <strong>Principal Office (Dr. Principal Ma'am)</strong>. No physical paperwork needed.
+        </div>
+
+        <form onsubmit="handleDigitalAppSubmit(event)">
+          <div class="form-group-mb">
+            <label class="form-label">Application Purpose / Category <span>*</span></label>
+            <select class="input-clean" id="app-category" required>
+              <option value="">— Select Category —</option>
+              <option value="Fee Concession / Due Date Extension">Fee Concession / Due Date Extension</option>
+              <option value="Room / Bed Shifting Request">Room / Bed Shifting Request</option>
+              <option value="Hostel Gate Pass Appeal">Hostel Gate Pass Appeal</option>
+              <option value="Disciplinary Fine Waiver">Disciplinary Fine Waiver</option>
+              <option value="Urgent Infrastructure Issue">Urgent Infrastructure Issue</option>
+              <option value="General Administrative Prayer">General Administrative Prayer</option>
+            </select>
+          </div>
+
+          <div class="form-group-mb">
+            <label class="form-label">Subject Line <span>*</span></label>
+            <input type="text" class="input-clean" id="app-subject" placeholder="e.g. Request for extension of semester fee payment deadline" required>
+          </div>
+
+          <div class="form-group-mb">
+            <label class="form-label">Application Body (To The Principal Ma'am) <span>*</span></label>
+            <textarea class="input-clean" rows="6" id="app-body" placeholder="Respected Ma'am,&#10;&#10;With utmost respect, I beg to submit that..." required></textarea>
+          </div>
+
+          <button type="submit" class="btn-submit-main" id="btn-submit-digital-app">
+            <i class="fa-solid fa-paper-plane" style="margin-right:6px;"></i> Submit Digital Application
+          </button>
+        </form>
+
+        <!-- LIVE APPLICATION TRACKER FOR STUDENT -->
+        <div class="divider"></div>
+        <div class="section-title"><i class="fa-solid fa-clock-rotate-left" style="color:var(--navy-dark); margin-right:6px;"></i> Track Your Submitted Applications &amp; Ma'am's Feedback</div>
+
+        <div style="overflow-x:auto;">
+          <table class="leave-history-table">
+            <thead>
+              <tr>
+                <th>App Ref ID</th>
+                <th>Category &amp; Subject</th>
+                <th>Read Status</th>
+                <th>Decision Status</th>
+                <th>Principal Ma'am's Official Feedback</th>
+              </tr>
+            </thead>
+            <tbody id="tbl-my-digital-apps">
+              <tr><td colspan="5" style="text-align:center; color:#64748b; padding:16px;">Loading your digital petitions...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 4: UPDATE -->
+      <div id="pane-update" class="tab-pane">
+        <div class="callout-box callout-blue">
+          Updating any field will set your application to <strong>Pending</strong> until re-approved by the warden.
+        </div>
+
+        <form onsubmit="handleUpdateFormSubmit(event)">
+          <div class="grid-2-col form-group-mb">
+            <div>
+              <label class="form-label">Contact Number</label>
+              <input type="tel" class="input-clean" id="upd-contact" required>
+            </div>
+            <div>
+              <label class="form-label">Guardian's Contact</label>
+              <input type="tel" class="input-clean" id="upd-gcontact" required>
+            </div>
+          </div>
+          <button type="submit" class="btn-submit-main">Save Changes</button>
+        </form>
+      </div>
+
+      <!-- TAB 5: GRIEVANCES & LOCATION SPECIFICS -->
+      <div id="pane-grievances" class="tab-pane">
+        <div style="margin-bottom:18px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
+          <h3 style="font-size:1.15rem; color:var(--navy-dark); font-weight:700; text-transform:uppercase;">Lodge Incident / Maintenance Complaint</h3>
+        </div>
+
+        <form onsubmit="handleGrievanceSubmit(event)">
+          <div class="grid-2-col form-group-mb">
+            <div>
+              <label class="form-label">SPECIFIC INCIDENT SPOT / AREA <span>*</span></label>
+              <select class="input-clean" id="gr-specific-area" required>
+                <option value="My Allotted Room">My Allotted Room</option>
+                <option value="Washroom 1">Washroom 1 (Floor Common)</option>
+                <option value="Washroom 2">Washroom 2 (Floor Common)</option>
+                <option value="Water Cooler Area">Water Cooler Area</option>
+                <option value="Corridor / Passage">Corridor / Passage Light</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">YOUR REGISTERED HOSTEL &amp; ROOM</label>
+              <input type="text" class="input-clean" id="gr-display-room" readonly style="background:#f1f5f9; font-weight:700;">
+            </div>
+          </div>
+
+          <div class="form-group-mb">
+            <label class="form-label">Issue Classification <span>*</span></label>
+            <select class="input-clean" id="gr-category" required onchange="handleGrievanceCategorySwitch()">
+              <option value="Electricity / Switchboard Hazard">Electricity / Switchboard Hazard</option>
+              <option value="Sanitation / Overflowing Garbage">Sanitation / Overflowing Garbage</option>
+              <option value="Cleanliness & Room Hygiene">Cleanliness & Room Hygiene</option>
+              <option value="Plumbing / Water Supply">Plumbing / Water Supply</option>
+              <option value="Noise Pollution">Noise Pollution (Late Night Disturbance)</option>
+            </select>
+          </div>
+
+          <div class="form-group-mb">
+            <label class="form-label">Complaint Specifics <span>*</span></label>
+            <textarea class="input-clean" rows="3" id="gr-desc" placeholder="Describe specific issue details (e.g. Broken switchboard, water leakage, MCB trip)..." required></textarea>
+          </div>
+
+          <div class="sensor-grid" id="sensor-grid-container">
+            <div class="sensor-card">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <span style="font-size:0.8rem; text-transform:uppercase; font-weight:700; color:var(--navy-dark);">
+                  <i class="fa-solid fa-camera"></i> Live Visual Proof
+                </span>
+                <div style="display:flex; gap:4px; background:#e2e8f0; padding:2px; border-radius:6px;">
+                  <button type="button" id="btn-mode-photo" class="btn-ctrl" style="margin:0; padding:3px 10px; font-size:0.74rem; background:var(--navy-dark); color:#fff;" onclick="setMediaMode('photo')">Photo</button>
+                  <button type="button" id="btn-mode-video" class="btn-ctrl" style="margin:0; padding:3px 10px; font-size:0.74rem; background:transparent; color:#334155;" onclick="setMediaMode('video')">Video</button>
+                </div>
+              </div>
+
+              <video id="webcam-vid" autoplay playsinline muted class="camera-preview"></video>
+              <canvas id="watermark-canvas" class="hidden"></canvas>
+              <img id="photo-preview" class="captured-output hidden">
+              <video id="video-preview" controls class="captured-output hidden"></video>
+
+              <div style="display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin-top:8px;">
+                <button type="button" class="btn-ctrl btn-cam" onclick="startCamera()" id="btn-cam-start">
+                  <i class="fa-solid fa-video"></i> Start Camera
+                </button>
+                <button type="button" class="btn-ctrl btn-flip hidden" id="btn-cam-switch" onclick="switchCameraFacing()">
+                  <i class="fa-solid fa-arrows-rotate"></i> Switch Camera
+                </button>
+                <button type="button" class="btn-ctrl btn-cam hidden" onclick="captureWatermarkedPhoto()" id="btn-cam-snap">
+                  <i class="fa-solid fa-camera-retro"></i> Snap Photo
+                </button>
+                <button type="button" class="btn-ctrl btn-rec hidden" onclick="startVideoRecording()" id="btn-vid-rec">
+                  <i class="fa-solid fa-circle-dot"></i> Record Video
+                </button>
+                <button type="button" class="btn-ctrl btn-stop hidden" onclick="stopVideoRecording()" id="btn-vid-stop">
+                  <i class="fa-solid fa-square"></i> Stop Video
+                </button>
+              </div>
+
+              <div id="photo-timestamp-msg" style="font-size:0.75rem; color:#64748b; margin-top:6px;">Camera is currently off. Click 'Start Camera'.</div>
+            </div>
+
+            <div class="sensor-card hidden" id="noise-sensor-card">
+              <div style="font-size:0.8rem; text-transform:uppercase; font-weight:700; margin-bottom:8px; color:var(--navy-dark);">Sound Recording &amp; Decibel (dB) Meter</div>
+              <div class="db-meter-box" id="db-display">0.0 dB</div>
+              <div style="font-size:0.78rem; font-weight:600; color:var(--text-muted); margin-top:4px;" id="db-status">Mic Standby</div>
+              <div>
+                <button type="button" class="btn-ctrl btn-rec" onclick="startAudioRecord()" id="btn-mic-start">Record Audio</button>
+                <button type="button" class="btn-ctrl btn-stop hidden" onclick="stopAudioRecord()" id="btn-mic-stop">Stop</button>
+              </div>
+              <audio id="audio-playback" controls class="hidden" style="width:100%; height:32px; margin-top:8px;"></audio>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-submit-main" style="width:100%;">
+            Submit Complaint to Admin Desk
+          </button>
+        </form>
+
+        <div class="divider"></div>
+        <div class="section-title"><i class="fa-solid fa-list-check" style="color:var(--navy-dark); margin-right:6px;"></i> My Complaint Status &amp; Worker Work Proof</div>
+
+        <div style="overflow-x:auto;">
+          <table class="leave-history-table">
+            <thead>
+              <tr>
+                <th>Ticket ID</th>
+                <th>Category &amp; Location</th>
+                <th>Status</th>
+                <th>Before Proof</th>
+                <th>After Proof (Worker)</th>
+                <th>Action &amp; Feedback</th>
+              </tr>
+            </thead>
+            <tbody id="tbl-student-grievance-status">
+              <tr><td colspan="6" style="text-align:center; color:#64748b;">Loading status...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Student Feedback & Star Rating -->
+  <div id="modal-feedback" class="modal-overlay hidden">
+    <div class="modal-box" style="text-align:center;">
+      <div class="modal-head"><span>Rate Worker's Repair Quality</span><button onclick="closeModal('modal-feedback')" style="border:none; background:transparent; font-size:1.3rem; cursor:pointer;">&times;</button></div>
+      <form onsubmit="handleFeedbackSubmit(event)">
+        <input type="hidden" id="fb-ticket-id">
+        <div style="font-size:1.8rem; margin:14px 0; color:#eab308; cursor:pointer;" id="star-row">
+          <span onclick="setRating(1)">★</span>
+          <span onclick="setRating(2)">★</span>
+          <span onclick="setRating(3)">★</span>
+          <span onclick="setRating(4)">★</span>
+          <span onclick="setRating(5)">★</span>
+        </div>
+        <input type="hidden" id="fb-rating-val" value="5">
+        <textarea id="fb-review-text" rows="3" class="input-clean" placeholder="Write feedback for the worker & administration..." required></textarea>
+        <button type="submit" class="btn-submit-main" style="width:100%; margin-top:8px;">Submit Official Rating</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Student Self Password Modal -->
+  <div id="modal-student-pwd" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-head">
+        <span>Change My Password</span>
+        <button style="border:none; background:transparent; font-size:1.2rem; cursor:pointer;" onclick="closeModal('modal-student-pwd')">&times;</button>
+      </div>
+      <form onsubmit="handleStudentSelfPwd(event)">
+        <div class="form-group-mb">
+          <label class="form-label">Current Password <span>*</span></label>
+          <input type="password" class="input-clean" id="std-old-pwd" required placeholder="Enter current password">
+        </div>
+        <div class="form-group-mb">
+          <label class="form-label">New Password <span>*</span></label>
+          <input type="password" class="input-clean" id="std-new-pwd" required placeholder="Enter new password">
+        </div>
+        <button type="submit" class="btn-submit-main" style="width:100%;">Update My Password</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Hidden PDF Target for Instant Download -->
+  <div class="pdf-render-wrapper">
+    <div id="pdf-download-target" class="pdf-document">
+      <div class="pdf-header">
+        <div class="pdf-logo-circle">GOVT<br>POLY<br>MUNGER</div>
+        <div class="pdf-inst-text">
+          <h2>GOVERNMENT POLYTECHNIC, MUNGER</h2>
+          <p>Ramankabad, Haveli Kharagpur, Munger-811213, Bihar</p>
+        </div>
+      </div>
+      <div class="pdf-doc-title">HOSTEL LEAVE APPLICATION (APPROVED)</div>
+      <div class="pdf-meta-row">
+        <div>Ref. No.: <span id="pdf-ref-no">GPM/HLA/2026/1243</span></div>
+        <div>Date of Issue: <span id="pdf-issue-date">03-10-2026</span></div>
+      </div>
+      <div class="pdf-section-title">STUDENT DETAILS</div>
+      <table class="pdf-table">
+        <tr><td class="lbl">Student's Name</td><td id="pdf-student-name">--</td><td class="lbl">Roll No.</td><td id="pdf-roll">--</td></tr>
+        <tr><td class="lbl">Hostel</td><td id="pdf-hostel">--</td><td class="lbl">Room No.</td><td id="pdf-room">--</td></tr>
+        <tr><td class="lbl">Student's Mobile No.</td><td id="pdf-mobile">--</td><td class="lbl">Guardian's Mobile No.</td><td id="pdf-gmobile">--</td></tr>
+        <tr><td class="lbl">Address During Leave</td><td colspan="3" id="pdf-address">--</td></tr>
+        <tr><td class="lbl">Reason of Leave</td><td colspan="3" id="pdf-reason">--</td></tr>
+      </table>
+      <div class="pdf-section-title">LEAVE DURATION</div>
+      <table class="pdf-duration-table">
+        <thead><tr><th>Date of Departure</th><th>Date of Return</th><th>Total Days</th></tr></thead>
+        <tbody><tr><td id="pdf-dep-date">--</td><td id="pdf-ret-date">--</td><td id="pdf-total-days">--</td></tr></tbody>
+      </table>
+      <div class="pdf-subnote">Departure: After 06:00 AM | Return: Before 06:00 PM</div>
+      <div class="pdf-declaration-title">Declaration by Student:</div>
+      <div class="pdf-declaration-text">I hereby declare that the information provided is true to the best of my knowledge.</div>
+      <div class="pdf-sign-row">
+        <div class="pdf-sign-box"><div class="sig-name" id="pdf-student-sig">--</div><div>Student's Signature</div></div>
+        <div class="pdf-sign-box"><div class="warden-stamp-badge">APPROVED<br><small style="font-size:0.65rem;">by Warden GP Munger</small></div><div>Hostel Warden</div></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    const currentUser = enforceSession('student', 'login.html');
+
+    function renderDashboard() {
+      if (!currentUser) return;
+      document.getElementById('u-initials').innerText = (currentUser.name || 'AK').slice(0, 2).toUpperCase();
+      document.getElementById('u-name').innerText = currentUser.name;
+      document.getElementById('u-roll').innerText = currentUser.roll;
+      document.getElementById('u-status').innerText = currentUser.status || 'Approved';
+      
+      const hostelCode = currentUser.hostel_code || 'BH-01';
+      const roomNo = currentUser.room || 'G-01';
+      document.getElementById('u-hostel').innerText = hostelCode;
+      document.getElementById('u-room').innerText = roomNo;
+      document.getElementById('u-bed').innerText = currentUser.bed || '--';
+      document.getElementById('u-table').innerText = currentUser.table_no || '--';
+      document.getElementById('u-dob').innerText = currentUser.dob || '--';
+      document.getElementById('u-email').innerText = currentUser.email || '--';
+      document.getElementById('u-contact').innerText = currentUser.contact || '--';
+      document.getElementById('u-gcontact').innerText = currentUser.guardian_contact || '--';
+      document.getElementById('u-guardian').innerText = currentUser.guardian || '--';
+      document.getElementById('u-session').innerText = currentUser.session || 'Odd 2026 Session';
+      document.getElementById('u-district').innerText = currentUser.district || '--';
+      document.getElementById('u-address').innerText = currentUser.address || '--';
+      document.getElementById('u-submitted').innerText = currentUser.submitted_date || '--';
+      if (currentUser.photo_url) document.getElementById('u-photo').src = currentUser.photo_url;
+      if (currentUser.signature_url) document.getElementById('u-signature').src = currentUser.signature_url;
+      document.getElementById('upd-contact').value = currentUser.contact || '';
+      document.getElementById('upd-gcontact').value = currentUser.guardian_contact || '';
+
+      const roomDisplayElem = document.getElementById('gr-display-room');
+      if (roomDisplayElem) {
+        roomDisplayElem.value = `${hostelCode} • Room ${roomNo}`;
+      }
+    }
+    renderDashboard();
+
+    // Live Fresh Sync for Fines, Rooms & Status
+    async function syncFreshStudentData() {
+      try {
+        const res = await sendRequest('/admin/data');
+        if (res.ok) {
+          const freshRecord = (res.data.students || []).find(s => s.roll === currentUser.roll);
+          if (freshRecord) {
+            currentUser.fine_due = freshRecord.fine_due || 0;
+            currentUser.fine_history = freshRecord.fine_history || [];
+            currentUser.hostel_code = freshRecord.hostel_code || currentUser.hostel_code;
+            currentUser.room = freshRecord.room || currentUser.room;
+            sessionStorage.setItem('gpm_student', JSON.stringify(currentUser));
+            renderDashboard();
+            renderDuesAndFines();
+          }
+        }
+      } catch (err) {
+        console.error("Failed to sync fresh student data:", err);
+      }
+    }
+
+    function renderDuesAndFines() {
+      const fineDue = parseFloat(currentUser.fine_due) || 0;
+      const duesContainer = document.getElementById('dues-alert-container');
+      const fineHistoryTbody = document.getElementById('fine-history-rows');
+
+      if (!duesContainer || !fineHistoryTbody) return;
+
+      if (fineDue > 0) {
+        duesContainer.innerHTML = `
+          <div class="callout-box" style="background:#fef2f2; border-left:4px solid #dc2626; color:#991b1b; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:1.05rem; font-weight:800;"><i class="fa-solid fa-triangle-exclamation"></i> Disciplinary Fine Imposed: ₹${fineDue}</div>
+              <div style="font-size:0.8rem; margin-top:4px; color:#b91c1c;">Please clear this fine at the Admin Office desk immediately to avoid admit card withholding.</div>
+            </div>
+            <button onclick="window.print()" style="background:#dc2626; color:#fff; border:none; padding:8px 14px; border-radius:6px; font-weight:700; cursor:pointer; font-size:0.8rem;">
+              <i class="fa-solid fa-receipt"></i> Print Fine Notice
+            </button>
+          </div>
+        `;
+      } else {
+        duesContainer.innerHTML = `
+          <div class="callout-box callout-green">
+            <i class="fa-regular fa-square-check" style="font-size:1.1rem;"></i> No outstanding disciplinary fines. You are clear!
+          </div>
+        `;
+      }
+
+      if (currentUser.fine_history && currentUser.fine_history.length > 0) {
+        fineHistoryTbody.innerHTML = '';
+        currentUser.fine_history.forEach(fh => {
+          fineHistoryTbody.innerHTML += `
+            <tr>
+              <td><strong>${fh.reason || 'Disciplinary Violation'}</strong></td>
+              <td><strong style="color:#dc2626;">₹${fh.amount}</strong></td>
+              <td>${fh.date || '--'}</td>
+              <td><span style="background:#fee2e2; color:#b91c1c; font-weight:700; padding:3px 8px; border-radius:4px; font-size:0.75rem;">Due / Unpaid</span></td>
+            </tr>
+          `;
+        });
+      } else {
+        fineHistoryTbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#64748b;">No disciplinary penalty recorded.</td></tr>';
+      }
+    }
+
+    renderDuesAndFines();
+    syncFreshStudentData();
+
+    // Load Student's Digital Applications with Read Status & Ma'am's Feedback
+    async function loadMyDigitalApplications() {
+      const res = await sendRequest(`/student/my-applications?roll=${encodeURIComponent(currentUser.roll)}`);
+      const tbl = document.getElementById('tbl-my-digital-apps');
+      tbl.innerHTML = '';
+
+      if (!res.ok || !res.data.applications || res.data.applications.length === 0) {
+        tbl.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#64748b; padding:16px;">You have not submitted any digital applications yet.</td></tr>';
+        return;
+      }
+
+      res.data.applications.forEach(app => {
+        const isRead = app.is_read;
+        const readHtml = isRead 
+          ? `<span style="background:#dcfce7; color:#15803d; font-weight:700; padding:3px 8px; border-radius:4px; font-size:0.75rem;"><i class="fa-solid fa-check-double"></i> Read by Ma'am (${app.read_at || 'Seen'})</span>`
+          : `<span style="background:#fefce8; color:#b45309; font-weight:700; padding:3px 8px; border-radius:4px; font-size:0.75rem;"><i class="fa-solid fa-eye-slash"></i> Unopened / In Mailbox</span>`;
+
+        let decisionBadge = `<span style="background:#e0f2fe; color:#0369a1; font-weight:700; padding:3px 8px; border-radius:4px; font-size:0.75rem;">${app.status || 'Pending Review'}</span>`;
+        if (app.status === 'Sanctioned / Approved') {
+          decisionBadge = `<span style="background:#dcfce7; color:#15803d; font-weight:700; padding:3px 8px; border-radius:4px; font-size:0.75rem;"><i class="fa-solid fa-circle-check"></i> Sanctioned</span>`;
+        } else if (app.status === 'Rejected / Closed') {
+          decisionBadge = `<span style="background:#fee2e2; color:#b91c1c; font-weight:700; padding:3px 8px; border-radius:4px; font-size:0.75rem;"><i class="fa-solid fa-circle-xmark"></i> Rejected</span>`;
+        }
+
+        const feedbackHtml = app.principal_remarks 
+          ? `<div style="background:#f8fafc; border-left:3px solid #0a192f; padding:8px 10px; border-radius:4px; font-size:0.8rem;">
+              <strong style="color:#0a192f;">Principal Ma'am:</strong> "${app.principal_remarks}"
+              <div style="font-size:0.7rem; color:#64748b; margin-top:2px;">Issued on: ${app.action_date || '--'}</div>
+             </div>`
+          : `<span style="color:#94a3b8; font-size:0.78rem;">Awaiting executive order...</span>`;
+
+        tbl.innerHTML += `
+          <tr>
+            <td><strong>${app.app_id}</strong><br><small style="color:#64748b;">${app.submitted_at}</small></td>
+            <td><strong>${app.category}</strong><br><small style="color:#334155;">"${app.subject}"</small></td>
+            <td>${readHtml}</td>
+            <td>${decisionBadge}</td>
+            <td>${feedbackHtml}</td>
+          </tr>
+        `;
+      });
+    }
+
+    async function handleDigitalAppSubmit(e) {
+      e.preventDefault();
+      const payload = {
+        roll: currentUser.roll,
+        name: currentUser.name,
+        wing: currentUser.hostel_wing || 'boys',
+        category: document.getElementById('app-category').value,
+        subject: document.getElementById('app-subject').value.trim(),
+        body: document.getElementById('app-body').value.trim()
+      };
+
+      const btn = document.getElementById('btn-submit-digital-app');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting to Principal Ma\'am Desk...';
+
+      const res = await sendRequest('/applications/submit', 'POST', payload);
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-paper-plane" style="margin-right:6px;"></i> Submit Digital Application';
+
+      if (res.ok) {
+        alert("Digital Application successfully submitted to Principal Ma'am!\nRef No.: " + res.data.app_id);
+        e.target.reset();
+        loadMyDigitalApplications();
+      } else {
+        alert(res.data.message || "Failed to submit digital application.");
+      }
+    }
+
+    function openStudentPwdModal() {
+      document.getElementById('modal-student-pwd').classList.remove('hidden');
+    }
+
+    async function handleStudentSelfPwd(e) {
+      e.preventDefault();
+      const old_password = document.getElementById('std-old-pwd').value;
+      const new_password = document.getElementById('std-new-pwd').value;
+      const res = await sendRequest('/student/change-password', 'POST', {
+        roll: currentUser.roll,
+        old_password,
+        new_password
+      });
+
+      if (res.ok) {
+        alert(res.data.message);
+        closeModal('modal-student-pwd');
+        e.target.reset();
+      } else {
+        alert(res.data.message);
+      }
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    function initLeaveDateConstraints() {
+      const now = new Date();
+      const minDeparture = new Date(now);
+      minDeparture.setDate(now.getDate() + 2);
+      const yyyy = minDeparture.getFullYear();
+      const mm = String(minDeparture.getMonth() + 1).padStart(2, '0');
+      const dd = String(minDeparture.getDate()).padStart(2, '0');
+      document.getElementById('lv-dep-date').min = `${yyyy}-${mm}-${dd}`;
+      document.getElementById('lv-ret-date').disabled = true;
+    }
+    initLeaveDateConstraints();
+
+    function handleDepartureDateChange() {
+      const depDateVal = document.getElementById('lv-dep-date').value;
+      if (!depDateVal) return;
+      const retInput = document.getElementById('lv-ret-date');
+      retInput.disabled = false;
+      retInput.min = depDateVal;
+      const depDate = new Date(depDateVal);
+      const maxRetDate = new Date(depDate);
+      maxRetDate.setDate(depDate.getDate() + 9);
+      const yyyy = maxRetDate.getFullYear();
+      const mm = String(maxRetDate.getMonth() + 1).padStart(2, '0');
+      const dd = String(maxRetDate.getDate()).padStart(2, '0');
+      retInput.max = `${yyyy}-${mm}-${dd}`;
+      retInput.value = '';
+    }
+
+    function handleReturnDateChange() {
+      const dep = new Date(document.getElementById('lv-dep-date').value);
+      const ret = new Date(document.getElementById('lv-ret-date').value);
+      if (Math.ceil((ret - dep) / (1000 * 60 * 60 * 24)) + 1 > 10) {
+        alert("Maximum leave duration is 10 days.");
+        document.getElementById('lv-ret-date').value = '';
+      }
+    }
+
+    async function handleLeaveFormSubmit(e) {
+      e.preventDefault();
+      const payload = {
+        roll: currentUser.roll,
+        name: currentUser.name,
+        hostel: currentUser.hostel_code || 'BH-01',
+        room: currentUser.room || 'G-01',
+        reason: document.getElementById('lv-reason').value,
+        departure_date: document.getElementById('lv-dep-date').value,
+        return_date: document.getElementById('lv-ret-date').value,
+        address: document.getElementById('lv-address').value.trim(),
+        submitted_at: new Date().toLocaleDateString('en-GB').replace(/\//g, '-')
+      };
+      const res = await sendRequest('/leaves', 'POST', payload);
+      if (res.ok) {
+        alert("Leave Application Submitted! Reference ID: " + res.data.leave_id);
+        e.target.reset();
+        initLeaveDateConstraints();
+        loadStudentLeaves();
+      }
+    }
+
+    async function loadStudentLeaves() {
+      const res = await sendRequest(`/student/leaves?roll=${encodeURIComponent(currentUser.roll)}`);
+      const tbl = document.getElementById('tbl-my-leaves');
+      tbl.innerHTML = '';
+      if (!res.ok || !res.data.leaves || res.data.leaves.length === 0) {
+        tbl.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#64748b;">No leave applications found.</td></tr>';
+        return;
+      }
+      window.myLeaves = res.data.leaves;
+      res.data.leaves.forEach((l, idx) => {
+        const isApproved = l.status === "Approved";
+        const badge = isApproved ? `<span class="badge-leave-approved">Approved</span>` : `<span class="badge-leave-pending">Pending</span>`;
+        const printBtn = isApproved ? `<button class="btn-print-pass" onclick="autoDownloadPDF(${idx})"><i class="fa-solid fa-file-arrow-down"></i> Download Pass</button>` : `<span style="color:#94a3b8; font-size:0.75rem;">Awaiting Approval</span>`;
+        tbl.innerHTML += `<tr><td><strong>${l.leave_id}</strong></td><td>${l.departure_date} to ${l.return_date}</td><td>${l.reason}</td><td>${badge}</td><td>${printBtn}</td></tr>`;
+      });
+    }
+
+    async function autoDownloadPDF(idx) {
+      const l = window.myLeaves[idx];
+      const refNo = l.leave_id.replace('LV-GPM-', 'GPM/HLA/2026/');
+      document.getElementById('pdf-ref-no').innerText = refNo;
+      document.getElementById('pdf-issue-date').innerText = l.submitted_at || new Date().toLocaleDateString('en-GB');
+      document.getElementById('pdf-student-name').innerText = currentUser.name;
+      document.getElementById('pdf-roll').innerText = currentUser.roll;
+      document.getElementById('pdf-hostel').innerText = currentUser.hostel_code || "BH-01";
+      document.getElementById('pdf-room').innerText = currentUser.room || "G-01";
+      document.getElementById('pdf-mobile').innerText = currentUser.contact || "--";
+      document.getElementById('pdf-gmobile').innerText = currentUser.guardian_contact || "--";
+      document.getElementById('pdf-address').innerText = l.address || currentUser.address;
+      document.getElementById('pdf-reason').innerText = l.reason;
+      document.getElementById('pdf-dep-date').innerText = l.departure_date;
+      document.getElementById('pdf-ret-date').innerText = l.return_date;
+      document.getElementById('pdf-total-days').innerText = Math.ceil((new Date(l.return_date) - new Date(l.departure_date)) / (1000 * 60 * 60 * 24)) + 1;
+      document.getElementById('pdf-student-sig').innerText = currentUser.name;
+
+      const element = document.getElementById('pdf-download-target');
+      const filename = `Leave_${refNo.replace(/\//g, '-')}_${currentUser.name.replace(/\s+/g, '_')}.pdf`;
+      html2pdf().set({ margin: [8,8,8,8], filename: filename, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from(element).toPdf().get('pdf').then(function(pdfObj) {
+        const blob = pdfObj.output('blob');
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = blobUrl; a.download = filename; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        window.open(blobUrl, '_blank');
+      });
+    }
+
+    async function handleUpdateFormSubmit(e) {
+      e.preventDefault();
+      const payload = {
+        roll: currentUser.roll,
+        contact: document.getElementById('upd-contact').value.trim(),
+        guardian_contact: document.getElementById('upd-gcontact').value.trim()
+      };
+      const res = await sendRequest('/student/update-profile', 'POST', payload);
+      if (res.ok) {
+        alert("Profile update submitted! Pending warden review.");
+        currentUser.contact = payload.contact;
+        currentUser.guardian_contact = payload.guardian_contact;
+        sessionStorage.setItem('gpm_student', JSON.stringify(currentUser));
+        renderDashboard();
+      } else {
+        alert(res.data.message || "Update failed");
+      }
+    }
+
+    function switchTab(tab) {
+      ['profile', 'dues', 'leave', 'application', 'update', 'grievances'].forEach(t => {
+        const btn = document.getElementById('tab-btn-' + t);
+        const pane = document.getElementById('pane-' + t);
+        if (btn) btn.classList.toggle('active', t === tab);
+        if (pane) pane.classList.toggle('active', t === tab);
+      });
+      if (tab === 'leave') loadStudentLeaves();
+      if (tab === 'dues') syncFreshStudentData();
+      if (tab === 'application') loadMyDigitalApplications();
+      if (tab === 'grievances') loadStudentGrievanceStatus();
+    }
+
+    function handleGrievanceCategorySwitch() {
+      const isNoise = document.getElementById('gr-category').value === "Noise Pollution";
+      document.getElementById('noise-sensor-card').classList.toggle('hidden', !isNoise);
+      document.getElementById('sensor-grid-container').classList.toggle('two-col', isNoise);
+    }
+
+    // Camera & Video Engine
+    let currentStream = null;
+    let currentFacingMode = 'user';
+    let mediaMode = 'photo';
+    let mediaRecorderInstance = null;
+    let recordedVideoChunks = [];
+    let capturedPhotoData = null;
+    let capturedVideoData = null;
+
+    function setMediaMode(mode) {
+      mediaMode = mode;
+      document.getElementById('btn-mode-photo').style.background = mode === 'photo' ? 'var(--navy-dark)' : 'transparent';
+      document.getElementById('btn-mode-photo').style.color = mode === 'photo' ? '#fff' : '#334155';
+      document.getElementById('btn-mode-video').style.background = mode === 'video' ? 'var(--navy-dark)' : 'transparent';
+      document.getElementById('btn-mode-video').style.color = mode === 'video' ? '#fff' : '#334155';
+
+      if (currentStream) {
+        updateMediaButtons();
+      }
+    }
+
+    async function startCamera() {
+      if (currentStream) currentStream.getTracks().forEach(t => t.stop());
+
+      const constraints = {
+        video: { facingMode: { ideal: currentFacingMode }, width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: mediaMode === 'video'
+      };
+
+      try {
+        const videoElem = document.getElementById('webcam-vid');
+        currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+        videoElem.srcObject = currentStream;
+        await videoElem.play();
+
+        videoElem.classList.remove('hidden');
+        document.getElementById('photo-preview').classList.add('hidden');
+        document.getElementById('video-preview').classList.add('hidden');
+        document.getElementById('btn-cam-start').classList.add('hidden');
+        document.getElementById('btn-cam-switch').classList.remove('hidden');
+
+        updateMediaButtons();
+        document.getElementById('photo-timestamp-msg').innerText = `Camera active (${currentFacingMode === 'user' ? 'Front' : 'Back'} Camera)`;
+      } catch (err) {
+        alert("Camera Error: Allow camera permission in your browser.");
+      }
+    }
+
+    function switchCameraFacing() {
+      currentFacingMode = (currentFacingMode === 'user') ? 'environment' : 'user';
+      startCamera();
+    }
+
+    function updateMediaButtons() {
+      if (mediaMode === 'photo') {
+        document.getElementById('btn-cam-snap').classList.remove('hidden');
+        document.getElementById('btn-vid-rec').classList.add('hidden');
+        document.getElementById('btn-vid-stop').classList.add('hidden');
+      } else {
+        document.getElementById('btn-cam-snap').classList.add('hidden');
+        document.getElementById('btn-vid-rec').classList.remove('hidden');
+        document.getElementById('btn-vid-stop').classList.add('hidden');
+      }
+    }
+
+    function captureWatermarkedPhoto() {
+      const videoElem = document.getElementById('webcam-vid');
+      const canvas = document.getElementById('watermark-canvas');
+      canvas.width = videoElem.videoWidth || 640;
+      canvas.height = videoElem.videoHeight || 480;
+
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(videoElem, 0, 0, canvas.width, canvas.height);
+
+      const timeStr = new Date().toLocaleString('en-IN');
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+      ctx.fillRect(0, canvas.height - 36, canvas.width, 36);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 14px Arial';
+      ctx.fillText(`GP MUNGER | ${currentUser.hostel_code || 'BH-01'} Room ${currentUser.room || 'G-01'} | ${timeStr}`, 14, canvas.height - 13);
+
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+      capturedPhotoData = dataUrl;
+
+      const preview = document.getElementById('photo-preview');
+      preview.src = dataUrl;
+      preview.classList.remove('hidden');
+      videoElem.classList.add('hidden');
+
+      document.getElementById('photo-timestamp-msg').innerText = `Captured: ${timeStr} (Watermarked)`;
+      document.getElementById('btn-cam-snap').classList.add('hidden');
+      document.getElementById('btn-cam-start').classList.remove('hidden');
+      document.getElementById('btn-cam-start').innerHTML = '<i class="fa-solid fa-rotate-left"></i> Retake Photo';
+    }
+
+    function startVideoRecording() {
+      if (!currentStream) return;
+      recordedVideoChunks = [];
+
+      try {
+        mediaRecorderInstance = new MediaRecorder(currentStream, { mimeType: 'video/webm' });
+      } catch (e) {
+        mediaRecorderInstance = new MediaRecorder(currentStream);
+      }
+
+      mediaRecorderInstance.ondataavailable = e => {
+        if (e.data.size > 0) recordedVideoChunks.push(e.data);
+      };
+
+      mediaRecorderInstance.onstop = () => {
+        const blob = new Blob(recordedVideoChunks, { type: 'video/webm' });
+        const videoUrl = URL.createObjectURL(blob);
+        const videoPrev = document.getElementById('video-preview');
+        videoPrev.src = videoUrl;
+        videoPrev.classList.remove('hidden');
+        document.getElementById('webcam-vid').classList.add('hidden');
+
+        const reader = new FileReader();
+        reader.onloadend = () => { capturedVideoData = reader.result; };
+        reader.readAsDataURL(blob);
+
+        document.getElementById('photo-timestamp-msg').innerText = "Video recorded successfully!";
+        document.getElementById('btn-vid-stop').classList.add('hidden');
+        document.getElementById('btn-cam-start').classList.remove('hidden');
+        document.getElementById('btn-cam-start').innerHTML = '<i class="fa-solid fa-rotate-left"></i> Record Again';
+      };
+
+      mediaRecorderInstance.start();
+      document.getElementById('btn-vid-rec').classList.add('hidden');
+      document.getElementById('btn-vid-stop').classList.remove('hidden');
+      document.getElementById('photo-timestamp-msg').innerText = "🔴 Recording video in progress...";
+    }
+
+    function stopVideoRecording() {
+      if (mediaRecorderInstance && mediaRecorderInstance.state !== 'inactive') {
+        mediaRecorderInstance.stop();
+      }
+    }
+
+    async function handleGrievanceSubmit(e) {
+      e.preventDefault();
+      const specificArea = document.getElementById('gr-specific-area').value;
+      const fullRoomLocation = `${currentUser.room || 'G-01'} (${specificArea})`;
+
+      const payload = {
+        roll: currentUser.roll,
+        name: currentUser.name,
+        hostel: currentUser.hostel_code || 'BH-01',
+        room: fullRoomLocation,
+        category: document.getElementById('gr-category').value,
+        description: document.getElementById('gr-desc').value.trim(),
+        photo_base64: capturedPhotoData || capturedVideoData || null,
+        audio_base64: recordedAudioBase64 || null,
+        db_level: currentDbLevel || 0.0
+      };
+
+      const res = await sendRequest('/grievances', 'POST', payload);
+      if (res.ok) {
+        alert("Grievance lodged successfully! Ticket Ref: " + res.data.ticket_id);
+        e.target.reset();
+        if (currentStream) {
+          currentStream.getTracks().forEach(t => t.stop());
+          currentStream = null;
+        }
+        document.getElementById('photo-preview').classList.add('hidden');
+        document.getElementById('video-preview').classList.add('hidden');
+        document.getElementById('webcam-vid').classList.remove('hidden');
+        document.getElementById('btn-cam-start').classList.remove('hidden');
+        document.getElementById('btn-cam-snap').classList.add('hidden');
+        document.getElementById('btn-cam-switch').classList.add('hidden');
+        document.getElementById('btn-vid-rec').classList.add('hidden');
+        document.getElementById('btn-vid-stop').classList.add('hidden');
+        renderDashboard();
+        loadStudentGrievanceStatus();
+      }
+    }
+
+    async function loadStudentGrievanceStatus() {
+      const res = await sendRequest('/admin/data');
+      if (!res.ok) return;
+
+      const myGr = (res.data.grievances || []).filter(g => g.roll === currentUser.roll);
+      const tbody = document.getElementById('tbl-student-grievance-status');
+      tbody.innerHTML = '';
+
+      if (myGr.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#64748b; padding:16px;">No complaints registered yet.</td></tr>';
+        return;
+      }
+
+      myGr.forEach(g => {
+        let beforeImg = g.photo_base64 ? `<img src="${g.photo_base64}" style="width:70px; height:50px; object-fit:cover; border-radius:4px; cursor:pointer;" onclick="window.open('${g.photo_base64}')">` : '--';
+        let afterImg = g.after_proof ? `<img src="${g.after_proof}" style="width:70px; height:50px; object-fit:cover; border-radius:4px; border:2px solid #16a34a; cursor:pointer;" onclick="window.open('${g.after_proof}')">` : '<span style="color:#94a3b8; font-size:0.75rem;">Under Inspection</span>';
+
+        let actionBtn = '';
+        if (g.status === 'Resolved' && !g.feedback) {
+          actionBtn = `<button class="btn-ctrl" style="background:#f59e0b; color:#0f172a; margin:0;" onclick="openFeedbackModal('${g.ticket_id}')">Rate & Review</button>`;
+        } else if (g.feedback) {
+          actionBtn = `<span style="color:#ca8a04; font-weight:800;">${'★'.repeat(g.feedback.rating)} Reviewed</span>`;
+        } else {
+          actionBtn = `<span style="color:#0369a1; font-size:0.75rem;">Worker Active</span>`;
+        }
+
+        tbody.innerHTML += `
+          <tr>
+            <td><strong>${g.ticket_id}</strong></td>
+            <td><strong>${g.category}</strong><br><small style="color:#64748b;">${g.hostel} • ${g.room}</small></td>
+            <td><strong style="color:${g.status === 'Resolved' ? '#16a34a' : '#d97706'};">${g.status || 'Reported'}</strong></td>
+            <td>${beforeImg}</td>
+            <td>${afterImg}</td>
+            <td>${actionBtn}</td>
+          </tr>
+        `;
+      });
+    }
+
+    function openFeedbackModal(ticketId) {
+      document.getElementById('fb-ticket-id').value = ticketId;
+      document.getElementById('modal-feedback').classList.remove('hidden');
+    }
+
+    function setRating(r) {
+      document.getElementById('fb-rating-val').value = r;
+      const stars = document.getElementById('star-row').children;
+      for (let i = 0; i < 5; i++) {
+        stars[i].style.color = (i < r) ? '#eab308' : '#cbd5e1';
+      }
+    }
+
+    async function handleFeedbackSubmit(e) {
+      e.preventDefault();
+      const ticket_id = document.getElementById('fb-ticket-id').value;
+      const rating = document.getElementById('fb-rating-val').value;
+      const review = document.getElementById('fb-review-text').value.trim();
+
+      const res = await sendRequest('/student/submit-feedback', 'POST', { ticket_id, rating, review });
+      if (res.ok) {
+        alert("Thank you! Feedback submitted to Admin & Worker Desk.");
+        closeModal('modal-feedback');
+        loadStudentGrievanceStatus();
+      }
+    }
+
+    // Decibel Audio Logic
+    let audioStream = null;
+    let audioRecorder = null;
+    let audioChunks = [];
+    let recordedAudioBase64 = null;
+    let currentDbLevel = 0.0;
+    let audioContext = null;
+    let analyser = null;
+    let animFrame = null;
+
+    async function startAudioRecord() {
+      try {
+        audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioContext.createAnalyser();
+        const source = audioContext.createMediaStreamSource(audioStream);
+        source.connect(analyser);
+        analyser.fftSize = 256;
+
+        measureDb();
+
+        audioChunks = [];
+        audioRecorder = new MediaRecorder(audioStream);
+        audioRecorder.ondataavailable = e => audioChunks.push(e.data);
+        audioRecorder.onstop = () => {
+          const blob = new Blob(audioChunks, { type: 'audio/webm' });
+          const audioElem = document.getElementById('audio-playback');
+          audioElem.src = URL.createObjectURL(blob);
+          audioElem.classList.remove('hidden');
+
+          const reader = new FileReader();
+          reader.onloadend = () => { recordedAudioBase64 = reader.result; };
+          reader.readAsDataURL(blob);
+        };
+        audioRecorder.start();
+
+        document.getElementById('btn-mic-start').classList.add('hidden');
+        document.getElementById('btn-mic-stop').classList.remove('hidden');
+        document.getElementById('db-status').innerText = "🔴 Measuring Noise...";
+      } catch (err) {
+        alert("Mic Error: Allow mic permission in browser settings.");
+      }
+    }
+
+    function measureDb() {
+      const buffer = new Uint8Array(analyser.frequencyBinCount);
+      analyser.getByteFrequencyData(buffer);
+      let sum = 0;
+      for (let i = 0; i < buffer.length; i++) sum += buffer[i];
+      let avg = sum / buffer.length;
+      let db = Math.round((avg / 255) * 100 * 10) / 10;
+      currentDbLevel = db;
+      document.getElementById('db-display').innerText = `${db} dB`;
+
+      if (db > 70) {
+        document.getElementById('db-display').style.color = '#dc2626';
+        document.getElementById('db-status').innerText = '⚠️ CRITICAL: Exceeding silence threshold!';
+      } else {
+        document.getElementById('db-display').style.color = 'var(--navy-dark)';
+        document.getElementById('db-status').innerText = 'Acceptable Ambient Noise';
+      }
+      animFrame = requestAnimationFrame(measureDb);
+    }
+
+    function stopAudioRecord() {
+      if (audioRecorder && audioRecorder.state !== 'inactive') audioRecorder.stop();
+      if (audioStream) audioStream.getTracks().forEach(t => t.stop());
+      if (animFrame) cancelAnimationFrame(animFrame);
+      if (audioContext) audioContext.close();
+
+      document.getElementById('btn-mic-start').classList.remove('hidden');
+      document.getElementById('btn-mic-stop').classList.add('hidden');
+      document.getElementById('db-status').innerText = "Audio recording captured.";
+    }
+  </script>
+</body>
+</html>

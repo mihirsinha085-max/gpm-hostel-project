@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Principal Executive Supreme Console — GP Munger</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    :root {
+      --primary: #0a192f;
+      --gold: #c59b27;
+      --bg: #f8fafc;
+      --border: #e2e8f0;
+      --card: #ffffff;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Arial, sans-serif; }
+    body { background: var(--bg); min-height: 100vh; color: #1e293b; display: flex; flex-direction: column; }
+
+    header {
+      background: linear-gradient(135deg, #060e1a 0%, #0d213f 100%);
+      color: #fff;
+      padding: 16px 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 3.5px solid var(--gold);
+    }
+    .brand-title { font-size: 1.25rem; font-weight: 800; color: var(--gold); letter-spacing: 0.5px; display: flex; align-items: center; gap: 10px; font-family: Georgia, serif; }
+    .brand-sub { font-size: 0.8rem; color: #94a3b8; }
+    .btn-logout { background: #b91c1c; color: #fff; border: none; padding: 7px 16px; border-radius: 6px; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+    .btn-logout:hover { background: #991b1b; }
+
+    /* MASTER PORTAL SWITCHER BAR */
+    .portal-switcher-bar {
+      background: #0f172a;
+      padding: 10px 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #334155;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .switcher-label { color: #facc15; font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; display: flex; align-items: center; gap: 6px; }
+    .switcher-links { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .btn-switch-portal {
+      background: rgba(255,255,255,0.08);
+      color: #cbd5e1;
+      border: 1px solid #475569;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn-switch-portal:hover { background: #facc15; color: #0f172a; border-color: #facc15; }
+
+    .worker-dropdown-box {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid #f59e0b;
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+    .worker-select-nav {
+      background: #060e1a;
+      color: #facc15;
+      border: 1px solid #f59e0b;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      outline: none;
+    }
+
+    .wrap { max-width: 1420px; margin: 24px auto; padding: 0 16px; width: 100%; flex: 1; }
+
+    /* Top KPI Matrix */
+    .kpi-matrix { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; }
+    .kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px 14px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+    .kpi-label { font-size: 0.72rem; color: #64748b; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .kpi-val { font-size: 1.55rem; font-weight: 800; color: var(--primary); }
+
+    /* Tabs */
+    .tab-nav { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .tab-btn {
+      padding: 10px 16px; border-radius: 8px; border: 1px solid var(--border); background: #fff; font-weight: 700; font-size: 0.82rem; cursor: pointer; color: #475569; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;
+    }
+    .tab-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .tab-btn .badge-pill { background: #ef4444; color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; }
+
+    .panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 22px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); margin-bottom: 24px; }
+    .panel-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+    .panel-head h3 { font-size: 1.1rem; color: var(--primary); font-weight: 800; display: flex; align-items: center; gap: 8px; }
+
+    /* WORKER TABS INSIDE AUDIT PANEL */
+    .worker-filter-strip { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+    .worker-filter-btn {
+      padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border); background: #f8fafc; font-weight: 700; font-size: 0.8rem; cursor: pointer; color: #475569; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .worker-filter-btn.active { background: #0a192f; color: #fff; border-color: #0a192f; }
+    .worker-filter-btn .w-count { background: #f59e0b; color: #000; padding: 1px 6px; border-radius: 10px; font-size: 0.7rem; font-weight: 800; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    th, td { border: 1px solid var(--border); padding: 11px 12px; text-align: left; vertical-align: middle; }
+    th { background: #f8fafc; font-weight: 700; color: #334155; }
+
+    .badge-seen { background: #dcfce7; color: #15803d; font-weight: 700; padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; display: inline-flex; align-items: center; gap: 4px; }
+    .badge-unseen { background: #fefce8; color: #b45309; font-weight: 700; padding: 3px 8px; border-radius: 4px; font-size: 0.72rem; }
+
+    .btn-act { padding: 6px 12px; border-radius: 6px; border: none; font-weight: 700; font-size: 0.78rem; cursor: pointer; transition: opacity 0.2s; }
+    .btn-act:hover { opacity: 0.9; }
+    .btn-approve { background: #16a34a; color: #fff; }
+    .btn-reject { background: #dc2626; color: #fff; }
+
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    .proof-thumb { width: 64px; height: 46px; object-fit: cover; border-radius: 4px; border: 1px solid #cbd5e1; cursor: pointer; }
+    .proof-thumb:hover { transform: scale(1.05); }
+
+    .modal-overlay { position: fixed; inset: 0; background: rgba(6, 14, 26, 0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+    .modal-box { background: #fff; border-radius: 12px; padding: 26px; max-width: 620px; width: 100%; max-height: 90vh; overflow-y: auto; }
+    .modal-head { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 16px; font-weight: 800; color: var(--primary); font-size: 1.15rem; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <div class="brand-title"><i class="fa-solid fa-crown"></i> Office of the Principal &mdash; Government Polytechnic, Munger</div>
+      <div class="brand-sub">Patron-in-Chief Executive Inspection Desk &bull; Centralized Campus, Academic &amp; Hostel Audit</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:14px;">
+      <a href="index.html" style="color:#cbd5e1; text-decoration:none; font-size:0.85rem; font-weight:700;"><i class="fa-solid fa-house"></i> Main Portal</a>
+      <button class="btn-logout" onclick="sessionStorage.removeItem('gpm_principal'); sessionStorage.removeItem('gpm_inspection_active'); window.location.href='principal_login.html'">Sign Out</button>
+    </div>
+  </header>
+
+  <!-- SUPREME PORTAL SWITCHER BAR -->
+  <div class="portal-switcher-bar">
+    <div class="switcher-label">
+      <i class="fa-solid fa-shield-halved"></i> Live Direct Inspection Desks:
+    </div>
+    <div class="switcher-links">
+      <button class="btn-switch-portal" onclick="inspectAsAdmin()"><i class="fa-solid fa-building-columns"></i> Admin Office</button>
+      <button class="btn-switch-portal" onclick="inspectAsWarden('boys')"><i class="fa-solid fa-shield-halved"></i> Boys Warden</button>
+      <button class="btn-switch-portal" onclick="inspectAsWarden('girls')"><i class="fa-solid fa-shield-cat"></i> Girls Warden</button>
+      <button class="btn-switch-portal" onclick="inspectAsAcademic()"><i class="fa-solid fa-chalkboard-user"></i> Academic Incharge</button>
+      <button class="btn-switch-portal" onclick="inspectAsCampus()"><i class="fa-solid fa-tree-city"></i> Campus Incharge</button>
+      
+      <!-- Worker Switcher Dropdown -->
+      <div class="worker-dropdown-box">
+        <i class="fa-solid fa-wrench" style="color:#facc15; font-size:0.8rem;"></i>
+        <select id="select-worker-inspect" class="worker-select-nav">
+          <option value="worker_shailee">Shailee Kumar (Lead)</option>
+          <option value="worker_ranjeet">Ranjeet Kumar (Electrician)</option>
+          <option value="worker_amit">Amit Kumar (Plumber)</option>
+        </select>
+        <button class="btn-switch-portal" style="background:#f59e0b; color:#0f172a; padding:4px 10px;" onclick="inspectSelectedWorker()">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i> Inspect
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <!-- Top KPI Matrix -->
+    <div class="kpi-matrix">
+      <div class="kpi-card"><div class="kpi-label">Total Residents</div><div class="kpi-val" id="stat-students">0</div></div>
+      <div class="kpi-card"><div class="kpi-label">Pending Letters</div><div class="kpi-val" style="color:#ca8a04;" id="stat-letters">0</div></div>
+      <div class="kpi-card"><div class="kpi-label">Active Grievances</div><div class="kpi-val" style="color:#dc2626;" id="stat-grievances">0</div></div>
+      <div class="kpi-card"><div class="kpi-label">Gate Passes Tracked</div><div class="kpi-val" style="color:#0284c7;" id="stat-leaves">0</div></div>
+      <div class="kpi-card"><div class="kpi-label">Active Staff</div><div class="kpi-val" style="color:#16a34a;">3 Workers</div></div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="tab-nav">
+      <button class="tab-btn active" onclick="switchPane('applications')">
+        <i class="fa-solid fa-file-signature"></i> Student Petitions <span class="badge-pill" id="badge-app-count">0</span>
+      </button>
+      <button class="tab-btn" onclick="switchPane('academic')">
+        <i class="fa-solid fa-chalkboard-user"></i> Academic Audit
+      </button>
+      <button class="tab-btn" onclick="switchPane('campus')">
+        <i class="fa-solid fa-tree-city"></i> Campus Audit
+      </button>
+      <button class="tab-btn" onclick="switchPane('workers')">
+        <i class="fa-solid fa-wrench"></i> Workers Audit
+      </button>
+      <button class="tab-btn" onclick="switchPane('wardens')">
+        <i class="fa-solid fa-shield-halved"></i> Wardens Oversight
+      </button>
+      <button class="tab-btn" onclick="switchPane('admins')">
+        <i class="fa-solid fa-building-columns"></i> Admin Office Audit
+      </button>
+    </div>
+
+    <!-- PANE 1: DIGITAL APPLICATIONS -->
+    <div id="pane-applications" class="tab-pane active">
+      <div class="panel">
+        <div class="panel-head">
+          <h3><i class="fa-solid fa-envelope-open-text" style="color:var(--gold);"></i> Official Student Applications Submitted to Principal Desk</h3>
+          <button onclick="loadPrincipalDashboard()" style="padding:6px 14px; border:1px solid #cbd5e1; background:#fff; border-radius:6px; cursor:pointer; font-weight:700;"><i class="fa-solid fa-arrows-rotate"></i> Refresh</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Ref App ID</th>
+              <th>Resident Details</th>
+              <th>Category</th>
+              <th>Subject Line</th>
+              <th>Read Status</th>
+              <th>Status &amp; Order</th>
+              <th>Action by Ma'am</th>
+            </tr>
+          </thead>
+          <tbody id="tbl-principal-apps">
+            <tr><td colspan="7" style="text-align:center; padding:18px; color:#64748b;">Loading official letters...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PANE 2: ACADEMIC AUDIT -->
+    <div id="pane-academic" class="tab-pane">
+      <div class="panel">
+        <div class="panel-head">
+          <h3><i class="fa-solid fa-chalkboard-user" style="color:#0284c7;"></i> Academic Incharge Audit Desk (Prof. Suman Kumar)</h3>
+          <button onclick="loadPrincipalDashboard()" style="padding:6px 14px; border:1px solid #cbd5e1; background:#fff; border-radius:6px; cursor:pointer; font-weight:700;"><i class="fa-solid fa-arrows-rotate"></i> Refresh</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Ticket ID &amp; Date</th>
+              <th>Student (Roll &amp; Name)</th>
+              <th>Location</th>
+              <th>Issue</th>
+              <th>Photo Proof</th>
+              <th>Status &amp; Remarks</th>
+            </tr>
+          </thead>
+          <tbody id="tbl-academic-audit">
+            <tr><td colspan="6" style="text-align:center; padding:18px; color:#64748b;">Loading academic grievances...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PANE 3: CAMPUS AUDIT -->
+    <div id="pane-campus" class="tab-pane">
+      <div class="panel">
+        <div class="panel-head">
+          <h3><i class="fa-solid fa-tree-city" style="color:#dc2626;"></i> Campus &amp; Estate Incharge Audit Desk (Prof. Aswini Kumar)</h3>
+          <button onclick="loadPrincipalDashboard()" style="padding:6px 14px; border:1px solid #cbd5e1; background:#fff; border-radius:6px; cursor:pointer; font-weight:700;"><i class="fa-solid fa-arrows-rotate"></i> Refresh</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Ticket ID &amp; Date</th>
+              <th>Student (Roll &amp; Name)</th>
+              <th>Location</th>
+              <th>Issue</th>
+              <th>Photo Proof</th>
+              <th>Status &amp; Remarks</th>
+            </tr>
+          </thead>
+          <tbody id="tbl-campus-audit">
+            <tr><td colspan="6" style="text-align:center; padding:18px; color:#64748b;">Loading campus grievances...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PANE 4: WORKERS AUDIT -->
+    <div id="pane-workers" class="tab-pane">
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <h3><i class="fa-solid fa-bolt" style="color:#f59e0b;"></i> Maintenance Team Task Audit &amp; Performance</h3>
+            <p style="font-size:0.8rem; color:#64748b; margin-top:2px;">Filter tasks by worker to see pending jobs, completed after-proofs, and student ratings.</p>
+          </div>
+          <button onclick="loadPrincipalDashboard()" style="padding:6px 14px; border:1px solid #cbd5e1; background:#fff; border-radius:6px; cursor:pointer; font-weight:700;"><i class="fa-solid fa-arrows-rotate"></i> Refresh</button>
+        </div>
+
+        <div class="worker-filter-strip">
+          <button class="worker-filter-btn active" id="w-btn-all" onclick="filterWorkerAudit('ALL')">All Tasks <span class="w-count" id="count-w-all">0</span></button>
+          <button class="worker-filter-btn" id="w-btn-shailee" onclick="filterWorkerAudit('worker_shailee')">Shailee Kumar <span class="w-count" id="count-w-shailee">0</span></button>
+          <button class="worker-filter-btn" id="w-btn-ranjeet" onclick="filterWorkerAudit('worker_ranjeet')">Ranjeet Kumar <span class="w-count" id="count-w-ranjeet">0</span></button>
+          <button class="worker-filter-btn" id="w-btn-amit" onclick="filterWorkerAudit('worker_amit')">Amit Kumar <span class="w-count" id="count-w-amit">0</span></button>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Ticket ID</th>
+              <th>Hostel &amp; Room Spot</th>
+              <th>Category</th>
+              <th>Assigned Worker</th>
+              <th>Job Status</th>
+              <th>Evidence (Before &amp; After)</th>
+              <th>Student Rating &amp; Review</th>
+            </tr>
+          </thead>
+          <tbody id="tbl-worker-audit">
+            <tr><td colspan="7" style="text-align:center; padding:18px; color:#64748b;">Loading worker logs...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PANE 5: WARDENS AUDIT -->
+    <div id="pane-wardens" class="tab-pane">
+      <div class="panel">
+        <div class="panel-head">
+          <h3><i class="fa-solid fa-passport" style="color:#0284c7;"></i> Wardens Gate Pass Authorizations</h3>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Leave ID</th>
+              <th>Student Name &amp; Roll</th>
+              <th>Hostel Wing</th>
+              <th>Leave Period</th>
+              <th>Destination Address</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="tbl-warden-audit">
+            <tr><td colspan="6" style="text-align:center; padding:18px; color:#64748b;">Loading warden records...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PANE 6: ADMIN OFFICE AUDIT -->
+    <div id="pane-admins" class="tab-pane">
+      <div class="panel">
+        <div class="panel-head">
+          <h3><i class="fa-solid fa-users" style="color:#16a34a;"></i> Admin Office Resident Records &amp; Fines Audit</h3>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Roll Number</th>
+              <th>Student Name</th>
+              <th>Hostel &amp; Room</th>
+              <th>Disciplinary Fine Due</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="tbl-admin-audit">
+            <tr><td colspan="5" style="text-align:center; padding:18px; color:#64748b;">Loading admin records...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Read Letter, Give Feedback & Sanction -->
+  <div id="modal-app-review" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-head">
+        <span>Principal Review &amp; Order</span>
+        <button onclick="closeModal('modal-app-review')" style="border:none; background:transparent; font-size:1.3rem; cursor:pointer;">&times;</button>
+      </div>
+      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:14px; margin-bottom:16px;">
+        <div style="font-size:0.8rem; color:#64748b; font-weight:700;" id="m-app-meta">APP-ID</div>
+        <h4 style="font-size:1.05rem; color:#0f172a; margin:6px 0;" id="m-app-sub">Subject</h4>
+        <p style="font-size:0.88rem; color:#334155; line-height:1.6; white-space:pre-wrap; margin-top:10px; background:#fff; padding:12px; border-radius:6px; border:1px solid #cbd5e1;" id="m-app-body">Body</p>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="display:block; font-size:0.78rem; font-weight:800; color:#475569; text-transform:uppercase; margin-bottom:6px;">
+          Principal Ma'am's Official Feedback / Order Remarks:
+        </label>
+        <textarea id="m-app-remarks" rows="3" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.88rem; outline:none;" placeholder="Enter order..."></textarea>
+      </div>
+
+      <div style="display:flex; gap:10px;">
+        <button type="button" class="btn-act btn-approve" style="flex:1; padding:11px;" onclick="submitPrincipalAction('Sanctioned / Approved')">
+          <i class="fa-solid fa-check"></i> Sanction &amp; Approve
+        </button>
+        <button type="button" class="btn-act btn-reject" style="flex:1; padding:11px;" onclick="submitPrincipalAction('Rejected / Closed')">
+          <i class="fa-solid fa-xmark"></i> Reject Application
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    const currentPrincipal = JSON.parse(sessionStorage.getItem('gpm_principal') || 'null');
+    if (!currentPrincipal) {
+      window.location.href = 'principal_login.html';
+    }
+
+    let activeAppId = null;
+    let allGrievancesList = [];
+    let currentWorkerFilter = 'ALL';
+
+    function inspectAsAdmin() {
+      sessionStorage.setItem('gpm_admin', JSON.stringify({ id: 'admin', name: 'Admin Office (Inspected by Principal)' }));
+      sessionStorage.setItem('gpm_inspection_active', 'true');
+      window.open('admin.html', '_blank');
+    }
+
+    function inspectAsWarden(wing) {
+      sessionStorage.setItem('gpm_inspection_active', 'true');
+      if (wing === 'boys') {
+        sessionStorage.setItem('gpm_warden', JSON.stringify({ id: 'warden_aswini', name: 'Prof. Aswini Kumar (Boys - Inspected by Principal)', wing: 'boys' }));
+      } else {
+        sessionStorage.setItem('gpm_warden', JSON.stringify({ id: 'warden_ekta', name: 'Prof. Ekta Kumari (Girls - Inspected by Principal)', wing: 'girls' }));
+      }
+      window.open('warden.html', '_blank');
+    }
+
+    function inspectAsAcademic() {
+      sessionStorage.setItem('gpm_inspection_active', 'true');
+      sessionStorage.setItem('gpm_academic_staff', JSON.stringify({ id: 'suman_kumar', name: 'Prof. Suman Kumar', role: 'Academic Incharge' }));
+      window.open('academic_dashboard.html', '_blank');
+    }
+
+    function inspectAsCampus() {
+      sessionStorage.setItem('gpm_inspection_active', 'true');
+      sessionStorage.setItem('gpm_academic_staff', JSON.stringify({ id: 'aswini_kumar', name: 'Prof. Aswini Kumar', role: 'Campus Incharge' }));
+      window.open('academic_dashboard.html', '_blank');
+    }
+
+    function inspectSelectedWorker() {
+      const selectElem = document.getElementById('select-worker-inspect');
+      const workerId = selectElem.value;
+      const workerName = selectElem.options[selectElem.selectedIndex].text;
+
+      sessionStorage.setItem('gpm_inspection_active', 'true');
+      sessionStorage.setItem('gpm_worker', JSON.stringify({
+        id: workerId,
+        name: workerName.split('(')[0].trim(),
+        trade: 'Maintenance'
+      }));
+      window.open('worker.html', '_blank');
+    }
+
+    function switchPane(name) {
+      ['applications', 'academic', 'campus', 'workers', 'wardens', 'admins'].forEach(tab => {
+        document.getElementById('pane-' + tab).classList.toggle('active', tab === name);
+      });
+      document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+        const paneNames = ['applications', 'academic', 'campus', 'workers', 'wardens', 'admins'];
+        btn.classList.toggle('active', paneNames[idx] === name);
+      });
+    }
+
+    async function loadPrincipalDashboard() {
+      const res = await sendRequest('/super/dashboard-data');
+      if (!res.ok) return;
+
+      const { stats, applications, recent_leaves, recent_grievances, students } = res.data;
+      allGrievancesList = recent_grievances || [];
+
+      document.getElementById('stat-students').innerText = stats.total_students || 0;
+      document.getElementById('stat-letters').innerText = stats.pending_apps || 0;
+      document.getElementById('stat-grievances').innerText = stats.active_grievances || 0;
+      document.getElementById('stat-leaves').innerText = (recent_leaves || []).length;
+      document.getElementById('badge-app-count').innerText = (applications || []).filter(a => !a.principal_remarks).length;
+
+      document.getElementById('count-w-all').innerText = allGrievancesList.length;
+      document.getElementById('count-w-shailee').innerText = allGrievancesList.filter(g => g.assigned_worker_id === 'worker_shailee').length;
+      document.getElementById('count-w-ranjeet').innerText = allGrievancesList.filter(g => g.assigned_worker_id === 'worker_ranjeet').length;
+      document.getElementById('count-w-amit').innerText = allGrievancesList.filter(g => g.assigned_worker_id === 'worker_amit').length;
+
+      // 1. Applications Table
+      const appTbl = document.getElementById('tbl-principal-apps');
+      appTbl.innerHTML = '';
+      if (!applications || applications.length === 0) {
+        appTbl.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:18px; color:#64748b;">No digital petitions filed yet.</td></tr>';
+      } else {
+        window.allApps = applications;
+        applications.forEach((a, idx) => {
+          const isRead = a.is_read;
+          const readBadge = isRead 
+            ? `<span class="badge-seen"><i class="fa-solid fa-check-double"></i> Read by Ma'am (${a.read_at || 'Seen'})</span>` 
+            : `<span class="badge-unseen"><i class="fa-solid fa-envelope"></i> Unopened 👀</span>`;
+
+          const feedbackText = a.principal_remarks 
+            ? `<div style="color:#166534; font-weight:700; font-size:0.78rem; margin-top:3px;"><i class="fa-solid fa-quote-left"></i> "${a.principal_remarks}"</div>` 
+            : `<span style="color:#94a3b8; font-size:0.75rem;">Awaiting Order</span>`;
+
+          appTbl.innerHTML += `
+            <tr>
+              <td><strong>${a.app_id}</strong><br><small style="color:#64748b;">${a.submitted_at}</small></td>
+              <td><strong>${a.name}</strong><br><small>${a.roll} • ${(a.wing || 'boys').toUpperCase()}</small></td>
+              <td><span style="font-weight:700; color:var(--primary);">${a.category}</span></td>
+              <td><strong>${a.subject}</strong></td>
+              <td>${readBadge}</td>
+              <td><strong>${a.status}</strong>${feedbackText}</td>
+              <td>
+                <button class="btn-act" style="background:#0a192f; color:#fff;" onclick="openAppReviewModal(${idx})">
+                  <i class="fa-solid fa-file-pen"></i> Read &amp; Order
+                </button>
+              </td>
+            </tr>
+          `;
+        });
+      }
+
+      // 2. Academic Audit (Suman Kumar)
+      const acadTbl = document.getElementById('tbl-academic-audit');
+      acadTbl.innerHTML = '';
+      const academicList = allGrievancesList.filter(g => g.category_type === 'Academic');
+      if (academicList.length === 0) {
+        acadTbl.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:18px; color:#64748b;">No academic grievances reported yet.</td></tr>';
+      } else {
+        academicList.forEach(g => {
+          const isRes = g.status === 'Resolved';
+          acadTbl.innerHTML += `
+            <tr>
+              <td><strong>${g.ticket_id}</strong><br><small style="color:#64748b;">${g.timestamp}</small></td>
+              <td><strong>${g.roll || 'N/A'}</strong><br>${g.name || 'Anonymous'}</td>
+              <td><small>${g.location}</small></td>
+              <td><strong>${g.issue}</strong><br><small style="color:#64748b;">${g.description}</small></td>
+              <td>${g.photo_base64 ? `<img src="${g.photo_base64}" class="proof-thumb" onclick="window.open('${g.photo_base64}')">` : 'No Photo'}</td>
+              <td><span style="background:${isRes ? '#dcfce7' : '#fefce8'}; color:${isRes ? '#15803d' : '#b45309'}; font-weight:700; padding:3px 8px; border-radius:4px;">${g.status}</span><br><small>${g.resolved_notes || ''}</small></td>
+            </tr>
+          `;
+        });
+      }
+
+      // 3. Campus Audit (Aswini Kumar)
+      const campTbl = document.getElementById('tbl-campus-audit');
+      campTbl.innerHTML = '';
+      const campusList = allGrievancesList.filter(g => g.category_type === 'Campus' || g.category_type === 'Hostel');
+      if (campusList.length === 0) {
+        campTbl.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:18px; color:#64748b;">No campus grievances reported yet.</td></tr>';
+      } else {
+        campusList.forEach(g => {
+          const isRes = g.status === 'Resolved';
+          campTbl.innerHTML += `
+            <tr>
+              <td><strong>${g.ticket_id}</strong><br><small style="color:#64748b;">${g.timestamp}</small></td>
+              <td><strong>${g.roll || 'N/A'}</strong><br>${g.name || 'Anonymous'}</td>
+              <td><small>${g.location}</small></td>
+              <td><strong>${g.issue}</strong><br><small style="color:#64748b;">${g.description}</small></td>
+              <td>${g.photo_base64 ? `<img src="${g.photo_base64}" class="proof-thumb" onclick="window.open('${g.photo_base64}')">` : 'No Photo'}</td>
+              <td><span style="background:${isRes ? '#dcfce7' : '#fefce8'}; color:${isRes ? '#15803d' : '#b45309'}; font-weight:700; padding:3px 8px; border-radius:4px;">${g.status}</span><br><small>${g.resolved_notes || ''}</small></td>
+            </tr>
+          `;
+        });
+      }
+
+      // 4. Render Workers Audit Table
+      renderWorkerAuditTable();
+
+      // 5. Warden Audit Table
+      const warTbl = document.getElementById('tbl-warden-audit');
+      warTbl.innerHTML = '';
+      (recent_leaves || []).forEach(l => {
+        warTbl.innerHTML += `
+          <tr>
+            <td><strong>${l.leave_id}</strong></td>
+            <td><strong>${l.name}</strong> (${l.roll})</td>
+            <td>${(l.hostel_wing || 'Boys').toUpperCase()}</td>
+            <td>${l.departure_date} to ${l.return_date}</td>
+            <td><small>${l.address}</small></td>
+            <td><span style="background:${l.status === 'Approved' ? '#ecfdf5' : '#fefce8'}; color:${l.status === 'Approved' ? '#059669' : '#ca8a04'}; font-weight:700; padding:3px 8px; border-radius:4px;">${l.status}</span></td>
+          </tr>
+        `;
+      });
+
+      // 6. Admin Student Audit Table
+      const admTbl = document.getElementById('tbl-admin-audit');
+      admTbl.innerHTML = '';
+      (students || []).forEach(s => {
+        admTbl.innerHTML += `
+          <tr>
+            <td><strong>${s.roll}</strong></td>
+            <td>${s.name}</td>
+            <td>${s.hostel_code || 'BH-01'} | Room ${s.room || '--'}</td>
+            <td><strong style="color:${s.fine_due > 0 ? '#b91c1c' : '#16a34a'};">₹${s.fine_due || 0}</strong></td>
+            <td><span style="background:#ecfdf5; color:#059669; font-weight:700; padding:2px 8px; border-radius:4px;">${s.status || 'Approved'}</span></td>
+          </tr>
+        `;
+      });
+    }
+
+    function filterWorkerAudit(workerId) {
+      currentWorkerFilter = workerId;
+      document.querySelectorAll('.worker-filter-btn').forEach(btn => btn.classList.remove('active'));
+      
+      if (workerId === 'ALL') document.getElementById('w-btn-all').classList.add('active');
+      if (workerId === 'worker_shailee') document.getElementById('w-btn-shailee').classList.add('active');
+      if (workerId === 'worker_ranjeet') document.getElementById('w-btn-ranjeet').classList.add('active');
+      if (workerId === 'worker_amit') document.getElementById('w-btn-amit').classList.add('active');
+
+      renderWorkerAuditTable();
+    }
+
+    function renderWorkerAuditTable() {
+      const wrkTbl = document.getElementById('tbl-worker-audit');
+      wrkTbl.innerHTML = '';
+
+      let filteredList = allGrievancesList;
+      if (currentWorkerFilter !== 'ALL') {
+        filteredList = allGrievancesList.filter(g => g.assigned_worker_id === currentWorkerFilter);
+      }
+
+      if (filteredList.length === 0) {
+        wrkTbl.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:18px; color:#64748b;">No tasks logged for this worker.</td></tr>`;
+        return;
+      }
+
+      filteredList.forEach(g => {
+        let beforeImg = g.photo_base64 
+          ? `<img src="${g.photo_base64}" class="proof-thumb" onclick="window.open('${g.photo_base64}')">` 
+          : '<span style="color:#94a3b8; font-size:0.75rem;">None</span>';
+
+        let afterImg = g.after_proof 
+          ? `<img src="${g.after_proof}" class="proof-thumb" style="border:2px solid #16a34a;" onclick="window.open('${g.after_proof}')">` 
+          : '<span style="color:#94a3b8; font-size:0.75rem;">Pending</span>';
+
+        let ratingHtml = g.feedback 
+          ? `<span style="color:#ca8a04; font-weight:800;">${'★'.repeat(g.feedback.rating)}</span><br><small style="color:#166534; font-weight:600;">"${g.feedback.review}"</small>` 
+          : '<span style="color:#94a3b8; font-size:0.75rem;">Awaiting rating</span>';
+
+        let workerLabel = g.assigned_worker_name || 'Unassigned';
+        let statusBadge = '';
+        if (g.status === 'Resolved') {
+          statusBadge = `<span style="background:#dcfce7; color:#15803d; font-weight:800; padding:3px 8px; border-radius:4px; font-size:0.75rem;"><i class="fa-solid fa-circle-check"></i> Completed</span>`;
+        } else if (g.status === 'In Progress') {
+          statusBadge = `<span style="background:#e0f2fe; color:#0369a1; font-weight:800; padding:3px 8px; border-radius:4px; font-size:0.75rem;"><i class="fa-solid fa-person-digging"></i> In Progress</span>`;
+        } else {
+          statusBadge = `<span style="background:#fefce8; color:#b45309; font-weight:800; padding:3px 8px; border-radius:4px; font-size:0.75rem;">Pending</span>`;
+        }
+
+        wrkTbl.innerHTML += `
+          <tr>
+            <td><strong>${g.ticket_id}</strong><br><small style="color:#64748b;">${g.timestamp}</small></td>
+            <td><strong>${g.hostel || 'BH-01'}</strong><br><small style="font-weight:700; color:#475569;">${g.room || '--'}</small></td>
+            <td><strong>${g.category}</strong><br><small style="color:#475569;">${g.description}</small></td>
+            <td><strong style="color:#0369a1;">${workerLabel}</strong></td>
+            <td>${statusBadge}</td>
+            <td>
+              <div style="display:flex; gap:6px;">
+                <div><small style="display:block; font-size:0.65rem; color:#64748b; font-weight:700;">BEFORE</small>${beforeImg}</div>
+                <div><small style="display:block; font-size:0.65rem; color:#16a34a; font-weight:700;">AFTER</small>${afterImg}</div>
+              </div>
+            </td>
+            <td>${ratingHtml}</td>
+          </tr>
+        `;
+      });
+    }
+
+    function openAppReviewModal(idx) {
+      const a = window.allApps[idx];
+      activeAppId = a.app_id;
+      document.getElementById('m-app-meta').innerText = `${a.app_id} | From: ${a.name} (${a.roll}) • ${a.category}`;
+      document.getElementById('m-app-sub').innerText = a.subject;
+      document.getElementById('m-app-body').innerText = a.body;
+      document.getElementById('m-app-remarks').value = a.principal_remarks || '';
+      document.getElementById('modal-app-review').classList.remove('hidden');
+
+      sendRequest('/super/mark-app-read', 'POST', { app_id: a.app_id });
+    }
+
+    async function submitPrincipalAction(actionName) {
+      const remarks = document.getElementById('m-app-remarks').value.trim();
+      const res = await sendRequest('/super/action-application', 'POST', {
+        app_id: activeAppId,
+        action: actionName,
+        remarks: remarks || `Order: ${actionName} by Principal Desk`
+      });
+
+      if (res.ok) {
+        alert(res.data.message);
+        closeModal('modal-app-review');
+        loadPrincipalDashboard();
+      } else {
+        alert(res.data.message || "Failed to process order.");
+      }
+    }
+
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+    loadPrincipalDashboard();
+  </script>
+</body>
+</html>

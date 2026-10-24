@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hostel Incharge Desk — GP Munger</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    :root {
+      --primary: #0a192f;
+      --gold: #c59b27;
+      --bg: #f8fafc;
+      --border: #e2e8f0;
+      --card: #ffffff;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', sans-serif; }
+    body { background: var(--bg); min-height: 100vh; color: #1e293b; display:flex; flex-direction:column; }
+    
+    /* Top Inspection Strip - HIDDEN BY DEFAULT */
+    #principal-inspection-strip {
+      display: none;
+      background: linear-gradient(90deg, #0a192f 0%, #1e3a8a 100%);
+      color: #facc15;
+      padding: 9px 32px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #ca8a04;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 16px 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 3px solid var(--gold);
+    }
+    .brand-title { font-size: 1.2rem; font-weight: 700; color: var(--gold); }
+    .brand-sub { font-size: 0.78rem; color: #cbd5e1; }
+
+    .wrap { max-width: 1240px; margin: 28px auto; padding: 0 16px; width: 100%; flex: 1; }
+
+    .panel-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+    .panel-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+    .panel-head h3 { font-size: 1.15rem; color: var(--primary); font-weight: 700; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+    th, td { border: 1px solid var(--border); padding: 12px 14px; text-align: left; vertical-align: middle; }
+    th { background: #f8fafc; font-weight: 700; color: #334155; }
+
+    .btn-act { padding: 6px 14px; border-radius: 6px; border: none; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+    .btn-approve { background: #16a34a; color: #fff; }
+    .badge-approved { background: #ecfdf5; color: #059669; font-weight: 700; padding: 4px 10px; border-radius: 4px; }
+    .badge-pending { background: #fefce8; color: #ca8a04; font-weight: 700; padding: 4px 10px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+  <!-- FLOATING INSPECTION BANNER (ONLY VISIBLE ON PRINCIPAL MAM INSPECTION) -->
+  <div id="principal-inspection-strip">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <i class="fa-solid fa-crown"></i>
+      <span>Executive Inspection Mode &bull; Inspected by Office of the Principal</span>
+    </div>
+    <a href="principal.html" style="background:#facc15; color:#0a192f; text-decoration:none; padding:4px 12px; border-radius:5px; font-weight:800; font-size:0.78rem; display:inline-flex; align-items:center; gap:6px;">
+      <i class="fa-solid fa-arrow-left"></i> Return to Principal Console
+    </a>
+  </div>
+
+  <header>
+    <div>
+      <div class="brand-title">GOVERNMENT POLYTECHNIC, MUNGER</div>
+      <div class="brand-sub" id="warden-sub">Hostel Incharge Desk &bull; Gate Pass Sanction</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <a href="index.html" style="color:#cbd5e1; text-decoration:none; font-size:0.85rem; font-weight:700;"><i class="fa-solid fa-house"></i> Home</a>
+      <button onclick="sessionStorage.removeItem('gpm_warden'); window.location.href='warden_login.html'" style="background:#dc2626; color:#fff; border:none; padding:7px 16px; border-radius:6px; font-weight:700; cursor:pointer;">Logout</button>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div class="panel-box">
+      <div class="panel-head">
+        <h3><i class="fa-solid fa-passport" style="color:var(--gold); margin-right:8px;"></i> Outstation Leave Applications (Gate Pass Authorization)</h3>
+        <button onclick="loadWardenLeaves()" style="padding:6px 14px; border-radius:6px; border:1px solid #cbd5e1; background:#fff; cursor:pointer; font-weight:600;"><i class="fa-solid fa-arrows-rotate"></i> Refresh</button>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Leave Ref No.</th>
+            <th>Resident Details</th>
+            <th>Hostel &amp; Room</th>
+            <th>Leave Period</th>
+            <th>Destination Address</th>
+            <th>Reason</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="tbl-warden-leaves">
+          <tr><td colspan="8" style="text-align:center; padding:18px; color:#64748b;">Loading pending gate passes...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    const currentWarden = JSON.parse(sessionStorage.getItem('gpm_warden') || 'null');
+    if (!currentWarden) {
+      window.location.href = 'warden_login.html';
+    }
+
+    // CHECK IF INSPECTED BY PRINCIPAL (STRICT CONDITION CHECK)
+    const isPrincipalInspecting = sessionStorage.getItem('gpm_principal') && sessionStorage.getItem('gpm_inspection_active') === 'true';
+    if (isPrincipalInspecting) {
+      const pStrip = document.getElementById('principal-inspection-strip');
+      if (pStrip) pStrip.style.display = 'flex';
+    }
+
+    document.getElementById('warden-sub').innerText = `${currentWarden.name} &bull; ${(currentWarden.wing || 'boys').toUpperCase()} WING CONTROL`;
+
+    async function loadWardenLeaves() {
+      const wing = (currentWarden.wing || 'boys').toLowerCase();
+      const res = await sendRequest(`/warden/data?wing=${encodeURIComponent(wing)}`);
+      if (!res.ok) return;
+
+      const { leaves } = res.data;
+      const tbody = document.getElementById('tbl-warden-leaves');
+      tbody.innerHTML = '';
+
+      if (!leaves || leaves.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#64748b; padding:18px;">No leave requests pending for your wing.</td></tr>';
+        return;
+      }
+
+      leaves.forEach(l => {
+        const isApproved = l.status === 'Approved';
+        const statusBadge = isApproved ? '<span class="badge-approved">Approved</span>' : '<span class="badge-pending">Pending Approval</span>';
+        const actionBtn = isApproved 
+          ? '<span style="color:#16a34a; font-weight:700;"><i class="fa-solid fa-check"></i> Sanctioned</span>'
+          : `<button class="btn-act btn-approve" onclick="approveGatePass('${l.leave_id}')"><i class="fa-solid fa-check"></i> Approve Pass</button>`;
+
+        tbody.innerHTML += `
+          <tr>
+            <td><strong>${l.leave_id}</strong></td>
+            <td><strong>${l.name}</strong><br><small>${l.roll}</small></td>
+            <td><strong>${l.hostel || 'BH-01'}</strong> • Room ${l.room || '--'}</td>
+            <td>${l.departure_date} to ${l.return_date}</td>
+            <td><small>${l.address || '--'}</small></td>
+            <td>${l.reason}</td>
+            <td>${statusBadge}</td>
+            <td>${actionBtn}</td>
+          </tr>
+        `;
+      });
+    }
+
+    async function approveGatePass(leaveId) {
+      const res = await sendRequest('/warden/approve-leave', 'POST', { leave_id: leaveId });
+      if (res.ok) {
+        alert("Gate pass approved successfully!");
+        loadWardenLeaves();
+      } else {
+        alert(res.data.message || "Failed to approve pass");
+      }
+    }
+
+    loadWardenLeaves();
+  </script>
+</body>
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Principal Executive Authentication — GP Munger</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    :root {
+      --primary: #040913;
+      --navy-card: #0a192f;
+      --gold: #c59b27;
+      --gold-hover: #e5b35c;
+      --border: rgba(197, 155, 39, 0.3);
+      --text-muted: #94a3b8;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', -apple-system, sans-serif; }
+    body {
+      background: radial-gradient(circle at 50% 20%, #0d213f 0%, #040913 80%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      color: #fff;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 440px;
+      background: rgba(10, 25, 47, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px 32px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+    }
+
+    .emblem-wrap {
+      width: 70px;
+      height: 70px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: var(--gold);
+      box-shadow: 0 0 25px rgba(197, 155, 39, 0.35);
+    }
+
+    .title-box { text-align: center; margin-bottom: 26px; }
+    .title-box h1 { font-family: Georgia, serif; font-size: 1.35rem; color: var(--gold); font-weight: 700; letter-spacing: 0.5px; }
+    .title-box p { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+
+    .callout-badge {
+      background: rgba(197, 155, 39, 0.1);
+      border-left: 3px solid var(--gold);
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      color: #fef08a;
+      margin-bottom: 22px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .form-group { margin-bottom: 18px; }
+    .form-label { display: block; font-size: 0.75rem; font-weight: 800; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    
+    .pwd-wrap { position: relative; }
+    .input-box {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(4, 9, 19, 0.7);
+      color: #ffffff;
+      font-size: 0.92rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .input-box:focus { border-color: var(--gold); box-shadow: 0 0 10px rgba(197, 155, 39, 0.3); }
+
+    .eye-icon {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .btn-super-submit {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, var(--gold) 0%, #9a7316 100%);
+      color: #040913;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 800;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-top: 10px;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .btn-super-submit:hover { transform: translateY(-1px); background: linear-gradient(135deg, var(--gold-hover) 0%, #b38722 100%); }
+
+    .back-home { display: block; text-align: center; margin-top: 24px; font-size: 0.82rem; color: var(--text-muted); text-decoration: none; }
+    .back-home:hover { color: #fff; text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <div class="login-container">
+    <div class="emblem-wrap">
+      <i class="fa-solid fa-crown"></i>
+    </div>
+    
+    <div class="title-box">
+      <h1>Office of the Principal</h1>
+      <p>Patron-in-Chief &bull; Executive Terminal</p>
+    </div>
+
+    <div class="callout-badge">
+      <i class="fa-solid fa-shield-halved" style="font-size:1.1rem; color:var(--gold);"></i>
+      <span>Restricted Terminal. Sanction official applications &amp; full hostel campus inspection.</span>
+    </div>
+
+    <form onsubmit="handlePrincipalLogin(event)" autocomplete="off">
+      <div class="form-group">
+        <label class="form-label">Principal ID <span>*</span></label>
+        <input type="text" class="input-box" id="p-id" value="principal_office" required placeholder="Enter Principal ID" autocomplete="off">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Security Passkey <span>*</span></label>
+        <div class="pwd-wrap">
+          <input type="password" class="input-box" id="p-pwd" value="principal123" required placeholder="Enter Secret Passkey" autocomplete="new-password">
+          <i class="fa-solid fa-eye eye-icon" onclick="togglePassView()" id="eye-toggle"></i>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-super-submit" id="btn-login-text">
+        <i class="fa-solid fa-lock-open" style="margin-right:6px;"></i> Authorize Executive Access
+      </button>
+    </form>
+
+    <a href="index.html" class="back-home">&larr; Return to Central Portal</a>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    function togglePassView() {
+      const pwd = document.getElementById('p-pwd');
+      const eye = document.getElementById('eye-toggle');
+      if (pwd.type === 'password') {
+        pwd.type = 'text';
+        eye.className = 'fa-solid fa-eye-slash eye-icon';
+      } else {
+        pwd.type = 'password';
+        eye.className = 'fa-solid fa-eye eye-icon';
+      }
+    }
+
+    async function handlePrincipalLogin(e) {
+      e.preventDefault();
+      const id = document.getElementById('p-id').value.trim();
+      const password = document.getElementById('p-pwd').value.trim();
+
+      const btn = document.getElementById('btn-login-text');
+      btn.innerText = "Verifying Clearance...";
+      btn.disabled = true;
+
+      const res = await sendRequest('/auth/principal-login', 'POST', { id, password });
+      btn.innerHTML = '<i class="fa-solid fa-lock-open" style="margin-right:6px;"></i> Authorize Executive Access';
+      btn.disabled = false;
+
+      if (res.ok) {
+        sessionStorage.setItem('gpm_principal', JSON.stringify(res.data.user));
+        // Redirecting directly to the Principal Console page
+        window.location.href = 'principal.html';
+      } else {
+        alert(res.data.message || "Access Denied: Invalid Principal Security Credentials.");
+      }
+    }
+  </script>
+</body>
+</html>

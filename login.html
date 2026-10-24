@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Resident Portal - GP Munger</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --navy-main: #0c1e38;
+      --navy-dark: #08172c;
+      --blue-tint: #f0f6ff;
+      --border-color: #cbd5e1;
+      --text-muted: #64748b;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', -apple-system, sans-serif; }
+    body { background: #f8fafc; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; }
+
+    .back-home-top {
+      align-self: flex-start;
+      max-width: 460px;
+      width: 100%;
+      margin: 0 auto 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #475569;
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 700;
+      transition: color 0.2s;
+    }
+    .back-home-top:hover { color: var(--navy-main); text-decoration: underline; }
+
+    .portal-card {
+      background: #ffffff;
+      width: 100%;
+      max-width: 460px;
+      padding: 30px 24px;
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.04);
+    }
+
+    /* Top Pills */
+    .pill-nav { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+    .pill-btn {
+      border: 1px solid #e2e8f0;
+      background: #ffffff;
+      color: #334155;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .pill-btn.active {
+      background: var(--navy-main);
+      color: #ffffff;
+      border-color: var(--navy-main);
+    }
+
+    /* QUICK DEMO STUDENT BUTTONS */
+    .demo-box {
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 16px;
+    }
+    .demo-box-label {
+      font-size: 0.7rem;
+      font-weight: 800;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .demo-btn-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .btn-demo {
+      flex: 1;
+      min-width: 130px;
+      padding: 7px 8px;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      transition: all 0.2s;
+    }
+    .btn-demo-boys { color: #0d1e38; }
+    .btn-demo-boys:hover { background: #e0f2fe; border-color: #0284c7; }
+    .btn-demo-girls { color: #be185d; }
+    .btn-demo-girls:hover { background: #fce7f3; border-color: #db2777; }
+
+    /* WING TOGGLE */
+    .wing-toggle-wrap {
+      display: flex;
+      background: #f1f5f9;
+      padding: 4px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      border: 1px solid #e2e8f0;
+    }
+    .wing-btn {
+      flex: 1;
+      text-align: center;
+      padding: 8px 10px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      border-radius: 7px;
+      border: none;
+      cursor: pointer;
+      background: transparent;
+      color: var(--text-muted);
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .wing-btn.active {
+      background: #ffffff;
+      color: var(--navy-main);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+
+    .form-title { font-size: 1.2rem; color: #0d1e38; font-weight: 800; font-family: Georgia, serif; }
+    .form-sub { font-size: 0.81rem; color: var(--text-muted); margin: 4px 0 16px; }
+
+    .info-callout {
+      background: var(--blue-tint);
+      border-left: 4px solid #3b82f6;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 0.78rem;
+      color: #1e3a8a;
+      line-height: 1.45;
+      margin-bottom: 16px;
+    }
+
+    .form-group { margin-bottom: 14px; }
+    .form-label { display: block; font-size: 0.74rem; font-weight: 800; color: #475569; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 5px; }
+    .form-label span { color: #dc2626; }
+
+    .input-box {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 0.88rem;
+      outline: none;
+      color: #1e293b;
+    }
+    .input-box:focus { border-color: var(--navy-main); }
+
+    .roll-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+    .roll-grid input, .roll-grid select {
+      width: 100%;
+      padding: 10px 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 0.84rem;
+      outline: none;
+      background: #fff;
+    }
+
+    .pwd-wrap { position: relative; }
+    .pwd-wrap input { padding-right: 38px; }
+    .pwd-wrap .eye-btn {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #64748b;
+      font-size: 0.9rem;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 12px;
+      background: var(--navy-main);
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    .btn-submit:hover { background: #172d4d; }
+
+    .view-pane { display: none; }
+    .view-pane.active { display: block; }
+
+    /* Mobile Responsive Optimizations */
+    @media (max-width: 480px) {
+      body { padding: 10px; justify-content: flex-start; }
+      .portal-card { padding: 20px 16px; border-radius: 12px; }
+      .back-home-top { max-width: 100%; }
+      .roll-grid { grid-template-columns: 0.8fr 1.2fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Back to Home Link -->
+  <a href="index.html" class="back-home-top"><i class="fa-solid fa-arrow-left"></i> Back to Main Portal</a>
+
+  <div class="portal-card">
+    <!-- Top Nav Pills -->
+    <div class="pill-nav">
+      <button class="pill-btn active" id="pill-login" onclick="switchPane('login')">Login</button>
+      <button class="pill-btn" id="pill-register" onclick="window.location.href='admission.html'">Register</button>
+      <button class="pill-btn" id="pill-forgot" onclick="switchPane('forgot')">Forgot Password</button>
+      <button class="pill-btn" id="pill-reset" onclick="switchPane('reset')">Reset Password</button>
+    </div>
+
+    <!-- QUICK DEMO STUDENT BUTTONS -->
+    <div class="demo-box" id="demo-student-box">
+      <div class="demo-box-label">
+        <span>⚡ Quick Test Login</span>
+        <span style="color:#16a34a;">PIN: 1234</span>
+      </div>
+      <div class="demo-btn-row">
+        <button type="button" class="btn-demo btn-demo-boys" onclick="quickFillStudent('boys')">
+          <i class="fa-solid fa-person"></i> Anshu (BH-01)
+        </button>
+        <button type="button" class="btn-demo btn-demo-girls" onclick="quickFillStudent('girls')">
+          <i class="fa-solid fa-person-dress"></i> Nisha (GH-01)
+        </button>
+      </div>
+    </div>
+
+    <!-- SEPARATE BOYS / GIRLS HOSTEL TOGGLE -->
+    <div class="wing-toggle-wrap">
+      <button class="wing-btn active" id="btn-wing-boys" type="button" onclick="selectWing('boys')">
+        <i class="fa-solid fa-person"></i> Boys Hostel (BH-01)
+      </button>
+      <button class="wing-btn" id="btn-wing-girls" type="button" onclick="selectWing('girls')">
+        <i class="fa-solid fa-person-dress"></i> Girls Hostel (GH-01)
+      </button>
+    </div>
+
+    <!-- PANE 1: LOGIN -->
+    <div id="pane-login" class="view-pane active">
+      <h2 class="form-title" id="login-title-text">Boys Resident Login</h2>
+      <p class="form-sub" id="login-sub-text">Sign in to your Boys Hostel (BH-01) dashboard</p>
+
+      <form onsubmit="handleStudentLogin(event)" autocomplete="off">
+        <div class="form-group">
+          <label class="form-label">Email ID / Roll No. <span>*</span></label>
+          <input type="text" class="input-box" id="login-id" value="10/CSE/2024" required autocomplete="off">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Password <span>*</span></label>
+          <div class="pwd-wrap">
+            <input type="password" class="input-box" id="login-pwd" value="1234" required autocomplete="new-password">
+            <i class="fa-solid fa-eye eye-btn" onclick="toggleView('login-pwd', this)"></i>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-submit" id="btn-login-submit">Sign In to Boys Hostel</button>
+      </form>
+    </div>
+
+    <!-- PANE 2: FORGOT PASSWORD -->
+    <div id="pane-forgot" class="view-pane">
+      <h2 class="form-title">Forgot Password</h2>
+      <p class="form-sub">Verify your identity to set a new password</p>
+
+      <div class="info-callout">
+        🔒 Enter your <strong>Email ID</strong>, <strong>Roll No.</strong>, <strong>Date of Birth</strong>, and <strong>Parent's Contact No.</strong>. If all four match, you can update your password immediately.
+      </div>
+
+      <form id="form-forgot-pwd" onsubmit="handleForgotIdentitySubmit(event)" autocomplete="off">
+        <div class="form-group">
+          <label class="form-label">EMAIL ID <span>*</span></label>
+          <input type="email" class="input-box" id="fg-email" placeholder="your@email.com" required autocomplete="off">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">ROLL NO. <span>*</span></label>
+          <div class="roll-grid">
+            <input type="text" id="fg-roll-no" placeholder="No." required autocomplete="off">
+            <select id="fg-roll-branch" required>
+              <option value="CE">CE</option>
+              <option value="CSE" selected>CSE</option>
+              <option value="EE">EE</option>
+              <option value="EC">EC</option>
+              <option value="FTS">FTS</option>
+              <option value="ME">ME</option>
+            </select>
+            <input type="text" id="fg-roll-year" placeholder="Year" value="2024" required autocomplete="off">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">DATE OF BIRTH <span>*</span></label>
+          <input type="text" class="input-box" id="fg-dob" placeholder="DD/MM/YYYY" required autocomplete="off">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">PARENT'S CONTACT NO. <span>*</span></label>
+          <input type="tel" class="input-box" id="fg-parent-contact" placeholder="e.g. 9876543210" required autocomplete="off">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">NEW PASSWORD <span>*</span></label>
+          <div class="pwd-wrap">
+            <input type="password" class="input-box" id="fg-new-pwd" placeholder="At least 4 characters" required autocomplete="new-password">
+            <i class="fa-solid fa-eye eye-btn" onclick="toggleView('fg-new-pwd', this)"></i>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-submit">Verify & Continue</button>
+      </form>
+    </div>
+
+    <!-- PANE 3: RESET PASSWORD -->
+    <div id="pane-reset" class="view-pane">
+      <h2 class="form-title">Reset Password</h2>
+      <p class="form-sub">Know your current password? Set a new one directly.</p>
+
+      <div class="info-callout">
+        💡 Enter your <strong>current password</strong> and your <strong>new password</strong> to update immediately.
+      </div>
+
+      <form id="form-reset-pwd" onsubmit="handleDirectResetSubmit(event)" autocomplete="off">
+        <div class="form-group">
+          <label class="form-label">EMAIL ID <span>*</span></label>
+          <input type="email" class="input-box" id="rs-email" placeholder="your@email.com" required autocomplete="off">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">CURRENT PASSWORD <span>*</span></label>
+          <div class="pwd-wrap">
+            <input type="password" class="input-box" id="rs-curr-pwd" placeholder="Your current password" required autocomplete="new-password">
+            <i class="fa-solid fa-eye eye-btn" onclick="toggleView('rs-curr-pwd', this)"></i>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">NEW PASSWORD <span>*</span></label>
+          <div class="pwd-wrap">
+            <input type="password" class="input-box" id="rs-new-pwd" placeholder="At least 4 characters" required autocomplete="new-password">
+            <i class="fa-solid fa-eye eye-btn" onclick="toggleView('rs-new-pwd', this)"></i>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">CONFIRM NEW PASSWORD <span>*</span></label>
+          <input type="password" class="input-box" id="rs-conf-pwd" placeholder="Re-enter new password" required autocomplete="new-password">
+        </div>
+
+        <button type="submit" class="btn-submit">Reset Password</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    let selectedHostelWing = 'boys';
+
+    function quickFillStudent(type) {
+      if (type === 'boys') {
+        selectWing('boys');
+        document.getElementById('login-id').value = '10/CSE/2024';
+        document.getElementById('login-pwd').value = '1234';
+      } else {
+        selectWing('girls');
+        document.getElementById('login-id').value = '56/CSE/2024';
+        document.getElementById('login-pwd').value = '1234';
+      }
+    }
+
+    function selectWing(wing) {
+      selectedHostelWing = wing;
+      document.getElementById('btn-wing-boys').classList.toggle('active', wing === 'boys');
+      document.getElementById('btn-wing-girls').classList.toggle('active', wing === 'girls');
+
+      const isBoys = wing === 'boys';
+      document.getElementById('login-title-text').innerText = isBoys ? 'Boys Resident Login' : 'Girls Resident Login';
+      document.getElementById('login-sub-text').innerText = isBoys ? 'Sign in to your Boys Hostel (BH-01) dashboard' : 'Sign in to your Girls Hostel (GH-01) dashboard';
+      document.getElementById('btn-login-submit').innerText = isBoys ? 'Sign In to Boys Hostel' : 'Sign In to Girls Hostel';
+    }
+
+    function switchPane(name) {
+      ['login', 'forgot', 'reset'].forEach(p => {
+        const btn = document.getElementById('pill-' + p);
+        const pane = document.getElementById('pane-' + p);
+        if (btn) btn.classList.toggle('active', p === name);
+        if (pane) pane.classList.toggle('active', p === name);
+      });
+      document.getElementById('demo-student-box').style.display = (name === 'login') ? 'block' : 'none';
+    }
+
+    function toggleView(inputId, icon) {
+      const input = document.getElementById(inputId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fa-solid fa-eye-slash eye-btn';
+      } else {
+        input.type = 'password';
+        icon.className = 'fa-solid fa-eye eye-btn';
+      }
+    }
+
+    async function handleStudentLogin(e) {
+      e.preventDefault();
+      const loginId = document.getElementById('login-id').value.trim();
+      const password = document.getElementById('login-pwd').value.trim();
+
+      const res = await sendRequest('/auth/student-login', 'POST', { 
+        email_or_roll: loginId, 
+        password: password,
+        wing: selectedHostelWing
+      });
+
+      if (res.ok) {
+        const studentWing = (res.data.user.hostel_wing || 'boys').toLowerCase();
+        if (studentWing !== selectedHostelWing) {
+          alert(`Access Denied: Yeh account ${studentWing.toUpperCase()} HOSTEL me registered hai! Please upar se sahi Hostel select karein.`);
+          return;
+        }
+
+        sessionStorage.setItem('gpm_student', JSON.stringify(res.data.user));
+        window.location.href = 'dashboard.html';
+      } else {
+        alert(res.data.message || 'Invalid Credentials');
+      }
+    }
+
+    async function handleForgotIdentitySubmit(e) {
+      e.preventDefault();
+      const no = document.getElementById('fg-roll-no').value.trim();
+      const branch = document.getElementById('fg-roll-branch').value;
+      const year = document.getElementById('fg-roll-year').value.trim();
+      const fullRoll = `${no}/${branch}/${year}`;
+
+      const payload = {
+        email: document.getElementById('fg-email').value.trim(),
+        roll: fullRoll,
+        dob: document.getElementById('fg-dob').value.trim(),
+        parent_contact: document.getElementById('fg-parent-contact').value.trim(),
+        new_password: document.getElementById('fg-new-pwd').value.trim()
+      };
+
+      const res = await sendRequest('/auth/verify-and-set-password', 'POST', payload);
+      alert(res.data.message);
+      if (res.ok) {
+        switchPane('login');
+        document.getElementById('login-id').value = payload.roll;
+        document.getElementById('login-pwd').value = payload.new_password;
+      }
+    }
+
+    async function handleDirectResetSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById('rs-email').value.trim();
+      const current_password = document.getElementById('rs-curr-pwd').value.trim();
+      const new_password = document.getElementById('rs-new-pwd').value.trim();
+      const conf_password = document.getElementById('rs-conf-pwd').value.trim();
+
+      if (new_password !== conf_password) {
+        alert("New password aur Confirm password match nahi ho rahe!");
+        return;
+      }
+
+      const res = await sendRequest('/auth/direct-reset-password', 'POST', {
+        email,
+        current_password,
+        new_password
+      });
+
+      alert(res.data.message);
+      if (res.ok) {
+        switchPane('login');
+        document.getElementById('login-id').value = email;
+        document.getElementById('login-pwd').value = new_password;
+      }
+    }
+  </script>
+</body>
+</html>

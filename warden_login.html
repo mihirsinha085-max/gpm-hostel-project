@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hostel Incharge Login — GP Munger</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', sans-serif; }
+    body { background: #f1f5f9; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+
+    .back-home-top {
+      align-self: flex-start;
+      max-width: 440px;
+      width: 100%;
+      margin: 0 auto 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #475569;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+    .back-home-top:hover { color: #0a192f; text-decoration: underline; }
+
+    .login-card {
+      background: #ffffff;
+      width: 100%;
+      max-width: 440px;
+      border-radius: 14px;
+      border: 1px solid #cbd5e1;
+      padding: 34px 28px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    }
+    .login-icon {
+      width: 52px; height: 52px; border-radius: 12px; background: #fffbeb; color: #d97706;
+      display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 14px;
+    }
+    h2 { font-size: 1.35rem; color: #0f172a; margin-bottom: 4px; font-weight: 700; }
+    p { font-size: 0.84rem; color: #64748b; margin-bottom: 22px; }
+
+    .form-group { margin-bottom: 16px; }
+    label { display: block; font-size: 0.76rem; font-weight: 700; color: #334155; text-transform: uppercase; margin-bottom: 6px; }
+    .input-box { width: 100%; padding: 11px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; outline: none; }
+    .input-box:focus { border-color: #0a192f; }
+
+    .btn-submit {
+      width: 100%; padding: 12px; background: #0a192f; color: #ffffff; border: none;
+      border-radius: 6px; font-weight: 700; font-size: 0.95rem; cursor: pointer; margin-top: 10px;
+    }
+    .btn-submit:hover { background: #132d54; }
+
+    .quick-warden-strip {
+      background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 6px; padding: 10px; margin-bottom: 18px; font-size: 0.75rem; color: #475569;
+    }
+  </style>
+</head>
+<body>
+
+  <a href="index.html" class="back-home-top"><i class="fa-solid fa-arrow-left"></i> Back to Main Portal</a>
+
+  <div class="login-card">
+    <div class="login-icon"><i class="fa-solid fa-shield-halved"></i></div>
+    <h2>Warden Incharge Desk</h2>
+    <p>Sign in to sanction outstation leave gate passes for residents</p>
+
+    <div class="quick-warden-strip">
+      <strong>Incharge Accounts:</strong><br>
+      &bull; Boys Hostels (BH-01/02): <code>warden_aswini</code> | <code>admin123</code><br>
+      &bull; Girls Hostels (GH-01/02): <code>warden_ekta</code> | <code>admin123</code>
+    </div>
+
+    <form onsubmit="handleWardenLogin(event)">
+      <div class="form-group">
+        <label>Warden ID</label>
+        <input type="text" class="input-box" id="warden-id" value="warden_aswini" required>
+      </div>
+
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" class="input-box" id="warden-pwd" value="admin123" required>
+      </div>
+
+      <button type="submit" class="btn-submit" id="btn-war-sub">Authorize &amp; Sign In</button>
+    </form>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    async function handleWardenLogin(e) {
+      e.preventDefault();
+      const id = document.getElementById('warden-id').value.trim();
+      const password = document.getElementById('warden-pwd').value.trim();
+
+      const btn = document.getElementById('btn-war-sub');
+      btn.innerText = "Authorizing...";
+      btn.disabled = true;
+
+      const res = await sendRequest('/auth/warden-login', 'POST', { id, password });
+      btn.innerText = "Authorize & Sign In";
+      btn.disabled = false;
+
+      if (res.ok) {
+        // Normal Warden login par inspection tokens wipe out
+        sessionStorage.removeItem('gpm_principal');
+        sessionStorage.removeItem('gpm_inspection_active');
+        sessionStorage.setItem('gpm_warden', JSON.stringify(res.data.user));
+        window.location.href = 'warden.html';
+      } else {
+        alert(res.data.message || "Invalid Warden Credentials!");
+      }
+    }
+  </script>
+</body>
+</html>

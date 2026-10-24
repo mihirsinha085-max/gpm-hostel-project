@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Student Admission - GP Munger</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root { --navy: #0d1e38; --border: #cbd5e1; --muted: #64748b; }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+    body { background: #f8fafc; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px 16px; }
+
+    .back-btn-link { align-self: flex-start; max-width: 620px; width: 100%; margin: 0 auto 12px; color: #334155; text-decoration: none; font-size: 0.88rem; font-weight: 600; cursor: pointer; }
+    .back-btn-link:hover { text-decoration: underline; }
+
+    .card { background: #fff; width: 100%; max-width: 620px; border-radius: 16px; border: 1px solid #e2e8f0; padding: 36px 32px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
+    .card h2 { font-family: Georgia, serif; font-size: 1.45rem; color: var(--navy); font-weight: 700; }
+    .step-label { font-size: 0.85rem; color: var(--muted); margin: 4px 0 24px; }
+
+    .form-group { margin-bottom: 20px; }
+    .form-label { display: block; font-size: 0.75rem; font-weight: 800; color: #475569; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 6px; }
+    .form-label span { color: #dc2626; }
+    .form-label small { font-weight: normal; color: var(--muted); text-transform: none; }
+
+    .input-box { width: 100%; padding: 11px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; outline: none; }
+    .input-box:focus { border-color: var(--navy); }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    .grid-3 input, .grid-3 select { width: 100%; padding: 11px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; outline: none; background: #fff; text-align: center; }
+    .preview-text { font-size: 0.8rem; color: var(--navy); font-weight: 700; margin-top: 6px; }
+
+    .upload-box { border: 1px dashed var(--border); border-radius: 8px; padding: 18px; display: flex; align-items: center; gap: 14px; cursor: pointer; background: #fafafa; }
+    .upload-box:hover { background: #f1f5f9; }
+    .upload-icon { width: 44px; height: 44px; border-radius: 8px; background: #e2e8f0; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 1.2rem; }
+
+    .btn-row { display: flex; justify-content: flex-end; gap: 12px; margin-top: 28px; }
+    .btn-next { background: var(--navy); color: #fff; border: none; padding: 11px 28px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; cursor: pointer; }
+    .btn-prev { background: #fff; color: #334155; border: 1px solid var(--border); padding: 11px 22px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; cursor: pointer; }
+
+    .step-pane { display: none; }
+    .step-pane.active { display: block; }
+  </style>
+</head>
+<body>
+
+  <a href="index.html" class="back-btn-link">← Back to Home</a>
+
+  <div class="card">
+    <h2>New Student Admission</h2>
+    <div class="step-label" id="step-indicator">Step 1 of 3 — Personal Information</div>
+
+    <form onsubmit="handleStepSubmit(event)">
+      <!-- STEP 1: Personal Information -->
+      <div id="step-1" class="step-pane active">
+        <div class="form-group">
+          <label class="form-label">FULL NAME <span>*</span></label>
+          <input type="text" class="input-box" id="reg-name" placeholder="Enter Full Name" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">PARENT'S / GUARDIAN'S NAME <span>*</span></label>
+          <input type="text" class="input-box" id="reg-guardian" placeholder="Enter Guardian's Full Name" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">ROLL NUMBER <span>*</span> <small>(English letters & digits)</small></label>
+          <div class="grid-3">
+            <input type="text" id="reg-roll-no" placeholder="25" value="25" required oninput="updateRollPreview()">
+            <select id="reg-roll-branch" required onchange="updateRollPreview()">
+              <option value="CE">CE</option>
+              <option value="CSE" selected>CSE</option>
+              <option value="EE">EE</option>
+              <option value="EC">EC</option>
+              <option value="FTS">FTS</option>
+              <option value="ME">ME</option>
+            </select>
+            <input type="text" id="reg-roll-year" value="2026" required oninput="updateRollPreview()">
+          </div>
+          <div class="preview-text">Preview: <span id="roll-preview-val">25/CSE/2026</span></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">DATE OF BIRTH <span>*</span></label>
+          <input type="date" class="input-box" id="reg-dob" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">STUDENT PHOTO <span>*</span> <small>(JPEG/PNG)</small></label>
+          <div class="upload-box" onclick="document.getElementById('file-photo').click()">
+            <div class="upload-icon"><i class="fa-solid fa-camera"></i></div>
+            <div>
+              <div style="font-size:0.85rem; font-weight:600; color:#334155;" id="photo-label">Click to upload passport size photo</div>
+              <div style="font-size:0.75rem; color:var(--muted);">JPEG or PNG format</div>
+            </div>
+          </div>
+          <input type="file" id="file-photo" style="display:none;" accept="image/*" onchange="previewFile(event, 'photo-label')">
+        </div>
+
+        <div class="btn-row">
+          <button type="button" class="btn-next" onclick="goToStep(2)">Next →</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: Hostel, Floor & Room Allotment Selection -->
+      <div id="step-2" class="step-pane">
+        <div class="form-group">
+          <label class="form-label">STUDENT EMAIL ID <span>*</span></label>
+          <input type="email" class="input-box" id="reg-email" placeholder="student@email.com" required>
+        </div>
+
+        <div class="grid-2 form-group">
+          <div>
+            <label class="form-label">STUDENT MOBILE <span>*</span></label>
+            <input type="tel" class="input-box" id="reg-contact" placeholder="10-digit mobile" required>
+          </div>
+          <div>
+            <label class="form-label">PARENT'S CONTACT <span>*</span></label>
+            <input type="tel" class="input-box" id="reg-gcontact" placeholder="Guardian contact" required>
+          </div>
+        </div>
+
+        <!-- 4 Hostels Selection -->
+        <div class="form-group">
+          <label class="form-label">HOSTEL CAMPUS BUILDING <span>*</span></label>
+          <select class="input-box" id="reg-hostel" required onchange="handleHostelChange()">
+            <option value="BH-01">BH-01 (Boys Hostel 1)</option>
+            <option value="BH-02">BH-02 (Boys Hostel 2)</option>
+            <option value="GH-01">GH-01 (Girls Hostel 1)</option>
+            <option value="GH-02">GH-02 (Girls Hostel 2)</option>
+          </select>
+        </div>
+
+        <!-- 4 Floors & 28 Rooms Selection -->
+        <div class="grid-2 form-group">
+          <div>
+            <label class="form-label">FLOOR <span>*</span></label>
+            <select class="input-box" id="reg-floor" required onchange="populateRooms()">
+              <option value="G">Ground Floor</option>
+              <option value="F">First Floor</option>
+              <option value="S">Second Floor</option>
+              <option value="T">Third Floor</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label">ROOM NUMBER <span>*</span></label>
+            <select class="input-box" id="reg-room" required>
+              <!-- Auto generated rooms G-01 to G-28, etc. -->
+            </select>
+          </div>
+        </div>
+
+        <div class="grid-2 form-group">
+          <div>
+            <label class="form-label">BED NUMBER <span>*</span></label>
+            <input type="text" class="input-box" id="reg-bed" placeholder="e.g. Bed-1 / Bed-2" required>
+          </div>
+          <div>
+            <label class="form-label">STUDY TABLE NO.</label>
+            <input type="text" class="input-box" id="reg-table" placeholder="e.g. T-1">
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button type="button" class="btn-prev" onclick="goToStep(1)">← Back</button>
+          <button type="button" class="btn-next" onclick="goToStep(3)">Next →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: Address & Declaration -->
+      <div id="step-3" class="step-pane">
+        <div class="form-group">
+          <label class="form-label">HOME DISTRICT <span>*</span></label>
+          <input type="text" class="input-box" id="reg-district" placeholder="e.g. Munger, Begusarai, Patna" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">PERMANENT RESIDENTIAL ADDRESS <span>*</span></label>
+          <textarea class="input-box" id="reg-address" rows="3" placeholder="Village / Town, Post Office, Police Station, PIN" required></textarea>
+        </div>
+
+        <div class="form-group" style="background:#f1f5f9; padding:12px; border-radius:8px; font-size:0.8rem; color:#475569;">
+          <label style="display:flex; gap:8px; cursor:pointer;">
+            <input type="checkbox" id="reg-agree" required style="margin-top:2px;">
+            <span>I declare that all details are accurate according to college admission records. Default student password is <strong>1234</strong>.</span>
+          </label>
+        </div>
+
+        <div class="btn-row">
+          <button type="button" class="btn-prev" onclick="goToStep(2)">← Back</button>
+          <button type="submit" class="btn-next" id="btn-final-submit">Submit Application</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    let photoBase64 = null;
+
+    function populateRooms() {
+      const floor = document.getElementById('reg-floor').value; // 'G', 'F', 'S', 'T'
+      const roomSelect = document.getElementById('reg-room');
+      roomSelect.innerHTML = '';
+
+      for (let i = 1; i <= 28; i++) {
+        const num = String(i).padStart(2, '0');
+        const roomName = `${floor}-${num}`;
+        roomSelect.innerHTML += `<option value="${roomName}">Room ${roomName}</option>`;
+      }
+    }
+    populateRooms(); // Initialize Ground Floor rooms
+
+    function handleHostelChange() {
+      const hostel = document.getElementById('reg-hostel').value;
+      // Auto toggle wing behind the scenes
+      populateRooms();
+    }
+
+    function updateRollPreview() {
+      const no = document.getElementById('reg-roll-no').value.trim() || '__';
+      const branch = document.getElementById('reg-roll-branch').value;
+      const year = document.getElementById('reg-roll-year').value.trim() || 'YYYY';
+      document.getElementById('roll-preview-val').innerText = `${no}/${branch}/${year}`;
+    }
+
+    function previewFile(event, labelId) {
+      const file = event.target.files[0];
+      if (file) {
+        document.getElementById(labelId).innerText = file.name;
+        const reader = new FileReader();
+        reader.onloadend = () => { photoBase64 = reader.result; };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function goToStep(step) {
+      if (step === 2) {
+        const name = document.getElementById('reg-name').value.trim();
+        const guardian = document.getElementById('reg-guardian').value.trim();
+        const no = document.getElementById('reg-roll-no').value.trim();
+        const dob = document.getElementById('reg-dob').value;
+        if (!name || !guardian || !no || !dob) {
+          alert("Please fill all mandatory fields in Step 1.");
+          return;
+        }
+      } else if (step === 3) {
+        const email = document.getElementById('reg-email').value.trim();
+        const contact = document.getElementById('reg-contact').value.trim();
+        const gcontact = document.getElementById('reg-gcontact').value.trim();
+        const bed = document.getElementById('reg-bed').value.trim();
+        if (!email || !contact || !gcontact || !bed) {
+          alert("Please fill all contact and room/bed details in Step 2.");
+          return;
+        }
+      }
+
+      document.getElementById('step-1').classList.toggle('active', step === 1);
+      document.getElementById('step-2').classList.toggle('active', step === 2);
+      document.getElementById('step-3').classList.toggle('active', step === 3);
+
+      const subtitles = {
+        1: "Step 1 of 3 — Personal Information",
+        2: "Step 2 of 3 — Hostel, Floor & Room Selection",
+        3: "Step 3 of 3 — Address & Final Declaration"
+      };
+      document.getElementById('step-indicator').innerText = subtitles[step];
+    }
+
+    async function handleStepSubmit(e) {
+      e.preventDefault();
+      const no = document.getElementById('reg-roll-no').value.trim();
+      const branch = document.getElementById('reg-roll-branch').value;
+      const year = document.getElementById('reg-roll-year').value.trim();
+      const fullRoll = `${no}/${branch}/${year}`;
+      const hostelCode = document.getElementById('reg-hostel').value;
+      const wing = hostelCode.startsWith('GH') ? 'girls' : 'boys';
+
+      const payload = {
+        roll: fullRoll,
+        name: document.getElementById('reg-name').value.trim(),
+        guardian: document.getElementById('reg-guardian').value.trim(),
+        dob: document.getElementById('reg-dob').value,
+        email: document.getElementById('reg-email').value.trim(),
+        contact: document.getElementById('reg-contact').value.trim(),
+        guardian_contact: document.getElementById('reg-gcontact').value.trim(),
+        branch: branch,
+        hostel_code: hostelCode,
+        hostel_wing: wing,
+        room: document.getElementById('reg-room').value,
+        bed: document.getElementById('reg-bed').value.trim(),
+        table_no: document.getElementById('reg-table').value.trim() || '--',
+        district: document.getElementById('reg-district').value.trim(),
+        address: document.getElementById('reg-address').value.trim(),
+        photo_url: photoBase64 || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=160&q=80"
+      };
+
+      const btn = document.getElementById('btn-final-submit');
+      btn.innerText = "Submitting...";
+      btn.disabled = true;
+
+      const res = await sendRequest('/student/register', 'POST', payload);
+      btn.innerText = "Submit Application";
+      btn.disabled = false;
+
+      if (res.ok) {
+        alert(res.data.message);
+        window.location.href = 'login.html';
+      } else {
+        alert(res.data.message || "Failed to submit admission.");
+      }
+    }
+  </script>
+</body>
+</html>

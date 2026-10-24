@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Control Center - GP Munger</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+    body { background: #f8fafc; color: #1e293b; min-height: 100vh; display: flex; flex-direction: column; }
+    
+    /* Top Inspection Strip - HIDDEN BY DEFAULT */
+    #principal-inspection-strip {
+      display: none;
+      background: linear-gradient(90deg, #0a192f 0%, #1e3a8a 100%);
+      color: #facc15;
+      padding: 9px 32px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #ca8a04;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    header { background: #060e1a; color: #ffffff; padding: 14px 32px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #d4a34b; }
+    .brand { font-size: 1.15rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 10px; }
+    .brand i { color: #d4a34b; }
+    .header-right { display: flex; align-items: center; gap: 14px; }
+    .back-home-btn { color: #cbd5e1; text-decoration: none; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+    .back-home-btn:hover { color: #fff; text-decoration: underline; }
+    .btn-logout { background: #b91c1c; color: #ffffff; border: none; padding: 7px 16px; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
+    .btn-logout:hover { background: #991b1b; }
+
+    .container { max-width: 1420px; margin: 24px auto; padding: 0 16px; width: 100%; flex: 1; }
+
+    .panel { background: #ffffff; padding: 22px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); }
+    .panel h3 { font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 12px; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+
+    .top-action-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .btn-primary { background: #0d1e38; color: #ffffff; border: none; padding: 9px 16px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-primary:hover { background: #172d4d; }
+    .btn-green { background: #16a34a; }
+    .btn-green:hover { background: #15803d; }
+    .btn-excel { background: #059669; }
+    .btn-excel:hover { background: #047857; }
+
+    .search-filter-box { display: flex; gap: 10px; align-items: center; margin-top: 14px; flex-wrap: wrap; }
+    .search-input { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; outline: none; flex: 1; min-width: 220px; }
+    .search-input:focus { border-color: #0d1e38; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 14px; }
+    th, td { border: 1px solid #e2e8f0; padding: 10px 12px; text-align: left; vertical-align: middle; }
+    th { background: #f1f5f9; font-weight: 600; color: #334155; }
+
+    .pwd-badge { display: inline-flex; align-items: center; gap: 6px; background: #f1f5f9; padding: 4px 8px; border-radius: 4px; border: 1px solid #cbd5e1; font-family: monospace; font-weight: 700; }
+    
+    .btn-sm { padding: 5px 9px; font-size: 0.75rem; border-radius: 4px; border: none; cursor: pointer; font-weight: 600; color: #fff; margin-right: 3px; display: inline-flex; align-items: center; gap: 4px; }
+    .btn-sm:hover { opacity: 0.9; }
+    .btn-fine { background: #d97706; }
+    .btn-fine:hover { background: #b45309; }
+    .btn-danger-tiny { background: #e2e8f0; color: #64748b; padding: 4px 7px; font-size: 0.72rem; border-radius: 4px; border: 1px solid #cbd5e1; cursor: pointer; }
+    .btn-danger-tiny:hover { background: #fee2e2; color: #dc2626; border-color: #fca5a5; }
+
+    .thumb-proof { width: 68px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #cbd5e1; cursor: pointer; transition: transform 0.2s; }
+    .thumb-proof:hover { transform: scale(1.05); }
+    .db-badge { background: #fee2e2; color: #b91c1c; font-weight: 700; padding: 3px 8px; border-radius: 4px; font-size: 0.74rem; display: inline-block; }
+    .btn-audio-listen { background: #7c3aed; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 0.74rem; font-weight: 700; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; }
+    .btn-audio-listen:hover { background: #6d28d9; }
+
+    .status-pill { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.74rem; font-weight: 700; }
+    .pill-reported { background: #fefce8; color: #b45309; }
+    .pill-progress { background: #e0f2fe; color: #0369a1; }
+    .pill-resolved { background: #dcfce7; color: #15803d; }
+
+    .modal-overlay { position: fixed; inset: 0; background: rgba(13, 30, 56, 0.85); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
+    .modal-box { background: #fff; border-radius: 8px; padding: 24px; max-width: 520px; width: 100%; max-height: 90vh; overflow-y: auto; }
+    .modal-head { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 14px; font-weight: 700; font-size: 1.05rem; }
+    .form-group { margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px; }
+    .form-group label { font-size: 0.78rem; font-weight: 700; color: #475569; }
+    .form-group input, .form-group select, .form-group textarea { padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 0.85rem; outline: none; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #0d1e38; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- FLOATING INSPECTION BANNER (ONLY VISIBLE TO PRINCIPAL MAM) -->
+  <div id="principal-inspection-strip">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <i class="fa-solid fa-crown"></i>
+      <span>Executive Inspection Mode &bull; Inspected by Office of the Principal</span>
+    </div>
+    <a href="principal.html" style="background:#facc15; color:#0a192f; text-decoration:none; padding:4px 12px; border-radius:5px; font-weight:800; font-size:0.78rem; display:inline-flex; align-items:center; gap:6px;">
+      <i class="fa-solid fa-arrow-left"></i> Return to Principal Console
+    </a>
+  </div>
+
+  <header>
+    <div class="brand">
+      <i class="fa-solid fa-building-columns"></i> GP Munger — Hostel Master Administration
+    </div>
+    <div class="header-right">
+      <a href="index.html" class="back-home-btn"><i class="fa-solid fa-house"></i> Home</a>
+      <button class="btn-logout" onclick="terminateSession('admin', 'admin_login.html')">Sign Out</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- PANEL 1: Quick Actions, Excel Import & Export -->
+    <div class="panel">
+      <div class="top-action-bar">
+        <div>
+          <h3><i class="fa-solid fa-file-excel" style="color:#16a34a;"></i> Bulk Operations &amp; Resident Management</h3>
+          <p style="font-size:0.82rem; color:#64748b;">Sir ya Admin yahan se seedha Excel upload karein, naya student add karein ya pura database CSV me export karein.</p>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn-primary btn-excel" onclick="exportStudentsCSV()"><i class="fa-solid fa-file-arrow-down"></i> Export Students CSV</button>
+          <button class="btn-primary btn-green" onclick="openAddStudentModal()"><i class="fa-solid fa-user-plus"></i> Add New Resident</button>
+        </div>
+      </div>
+
+      <div style="margin-top:16px; display:flex; gap:10px; align-items:center; background:#f8fafc; padding:14px; border-radius:6px; border:1px dashed #cbd5e1; flex-wrap:wrap;">
+        <input type="file" id="excel-file" accept=".xlsx, .xls, .csv" style="padding:6px; background:#fff; border:1px solid #cbd5e1; border-radius:4px;">
+        <button class="btn-primary" onclick="uploadExcel()" id="btn-up-excel"><i class="fa-solid fa-file-excel"></i> Upload Sir's Excel Sheet</button>
+        <span style="font-size:0.75rem; color:#64748b;">(Auto-detects columns: Roll, Name, Mobile, Hostel, Room, Bed, Table, etc.)</span>
+      </div>
+    </div>
+
+    <!-- PANEL 2: Master Student Table with Live Search Filter -->
+    <div class="panel">
+      <div class="top-action-bar">
+        <h3><i class="fa-solid fa-users" style="color:#0284c7;"></i> All Registered Residents (<span id="total-count">0</span> Total)</h3>
+      </div>
+      <div class="search-filter-box">
+        <input type="text" id="filter-search" class="search-input" placeholder="Search by Student Name, Roll Number, Room..." oninput="filterStudents()">
+        <select id="filter-hostel" style="padding:8px 12px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.85rem;" onchange="filterStudents()">
+          <option value="">All 4 Hostels</option>
+          <option value="BH-01">BH-01 (Boys)</option>
+          <option value="BH-02">BH-02 (Boys)</option>
+          <option value="GH-01">GH-01 (Girls)</option>
+          <option value="GH-02">GH-02 (Girls)</option>
+        </select>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Roll Number</th>
+              <th>Student Name</th>
+              <th>Hostel &amp; Room</th>
+              <th>Login ID (Email)</th>
+              <th>Current Password</th>
+              <th>Fine Status</th>
+              <th>Management Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tbl-master">
+            <tr><td colspan="7" style="text-align:center; color:#64748b;">Loading students...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PANEL 3: Grievances, Multi-Media Evidences & Flexible Task Assignment -->
+    <div class="panel">
+      <div class="top-action-bar">
+        <div>
+          <h3><i class="fa-solid fa-triangle-exclamation" style="color:#d97706;"></i> Resident Complaints, Evidence Review &amp; Task Assignment (<span id="gr-count">0</span> Active)</h3>
+          <p style="font-size:0.82rem; color:#64748b;">Review live audio/video/photo proofs. Assign to app electricians or phone/offline sweepers &amp; plumbers.</p>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn-primary btn-excel" onclick="exportGrievancesCSV()"><i class="fa-solid fa-file-arrow-down"></i> Export Complaints CSV</button>
+          <button class="btn-primary" onclick="loadData()" style="padding:6px 12px; font-size:0.78rem;"><i class="fa-solid fa-arrows-rotate"></i> Refresh Desk</button>
+        </div>
+      </div>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Ticket ID</th>
+              <th>Student Details</th>
+              <th>Campus Location</th>
+              <th>Issue &amp; Specifics</th>
+              <th>All Evidences (Photo / Video / Audio)</th>
+              <th>Maintenance Workflow</th>
+              <th>Student Rating</th>
+            </tr>
+          </thead>
+          <tbody id="tbl-admin-grievances">
+            <tr><td colspan="7" style="text-align:center; color:#64748b; padding:16px;">Loading grievances...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Add Single Student -->
+  <div id="modal-add" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-head">
+        <span>Add New Student Manually</span>
+        <button style="border:none; background:transparent; font-size:1.3rem; cursor:pointer;" onclick="closeModal('modal-add')">&times;</button>
+      </div>
+      <form onsubmit="handleAddSubmit(event)">
+        <div class="form-group"><label>Roll Number *</label><input type="text" id="add-roll" required placeholder="e.g. 15/CSE/2024"></div>
+        <div class="form-group"><label>Full Name *</label><input type="text" id="add-name" required placeholder="Student Name"></div>
+        <div class="form-group">
+          <label>Hostel Building</label>
+          <select id="add-hostel">
+            <option value="BH-01">BH-01 (Boys Hostel 1)</option>
+            <option value="BH-02">BH-02 (Boys Hostel 2)</option>
+            <option value="GH-01">GH-01 (Girls Hostel 1)</option>
+            <option value="GH-02">GH-02 (Girls Hostel 2)</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Room Number (e.g. G-01 to T-28)</label><input type="text" id="add-room" placeholder="e.g. S-17" required></div>
+        <div class="form-group"><label>Bed Number</label><input type="text" id="add-bed" placeholder="e.g. 143"></div>
+        <div class="form-group"><label>Table Number</label><input type="text" id="add-table" placeholder="e.g. T-12"></div>
+        <div class="form-group"><label>Mobile Contact</label><input type="tel" id="add-contact" placeholder="Mobile number"></div>
+        <div class="form-group"><label>Set Password</label><input type="text" id="add-pwd" value="1234"></div>
+        <button type="submit" class="btn-primary" style="width:100%; padding:10px; margin-top:8px;">Add Student Record</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Manage Student Fine -->
+  <div id="modal-fine" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-head">
+        <span>Manage Disciplinary Fine</span>
+        <button style="border:none; background:transparent; font-size:1.3rem; cursor:pointer;" onclick="closeModal('modal-fine')">&times;</button>
+      </div>
+      <form onsubmit="handleFineSubmit(event)">
+        <input type="hidden" id="fine-roll">
+        <div class="form-group"><label>Student Name:</label><input type="text" id="fine-name" readonly style="background:#f1f5f9; font-weight:700;"></div>
+        <div class="form-group"><label>Fine Amount (₹):</label><input type="number" id="fine-val" min="0" step="50" required placeholder="e.g. 200 (Enter 0 to clear dues)"></div>
+        <div class="form-group"><label>Reason for Fine / Remarks:</label><input type="text" id="fine-reason" placeholder="e.g. Late return / Noise curfew / Lost key" required></div>
+        <button type="submit" class="btn-primary btn-fine" style="width:100%; padding:10px; margin-top:8px;">Update Student Fine</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Edit Password -->
+  <div id="modal-pwd" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-head">
+        <span>Change Password</span>
+        <button style="border:none; background:transparent; font-size:1.3rem; cursor:pointer;" onclick="closeModal('modal-pwd')">&times;</button>
+      </div>
+      <form onsubmit="handlePwdSubmit(event)">
+        <input type="hidden" id="pwd-roll">
+        <div class="form-group"><label>Target Student:</label><input type="text" id="pwd-name" readonly style="background:#f1f5f9;"></div>
+        <div class="form-group"><label>New Password:</label><input type="text" id="pwd-val" required></div>
+        <button type="submit" class="btn-primary" style="width:100%; padding:10px;">Update Password</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Edit Student Record -->
+  <div id="modal-edit" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-head">
+        <span>Edit Student Record</span>
+        <button style="border:none; background:transparent; font-size:1.3rem; cursor:pointer;" onclick="closeModal('modal-edit')">&times;</button>
+      </div>
+      <form onsubmit="handleEditRecord(event)">
+        <input type="hidden" id="edit-roll">
+        <div class="form-group"><label>Full Name:</label><input type="text" id="edit-name" required></div>
+        <div class="form-group">
+          <label>Hostel:</label>
+          <select id="edit-hostel">
+            <option value="BH-01">BH-01</option>
+            <option value="BH-02">BH-02</option>
+            <option value="GH-01">GH-01</option>
+            <option value="GH-02">GH-02</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Room Number:</label><input type="text" id="edit-room"></div>
+        <div class="form-group"><label>Bed Number:</label><input type="text" id="edit-bed"></div>
+        <div class="form-group"><label>Table Number:</label><input type="text" id="edit-table"></div>
+        <div class="form-group"><label>Mobile Contact:</label><input type="text" id="edit-contact"></div>
+        <div class="form-group">
+          <label>Status:</label>
+          <select id="edit-status">
+            <option value="Approved">Approved</option>
+            <option value="Pending">Pending</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-primary" style="width:100%; padding:10px;">Save Changes</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Evidence Media & Audio Player -->
+  <div id="modal-media-view" class="modal-overlay hidden">
+    <div class="modal-box" style="max-width: 640px; text-align: center;">
+      <div class="modal-head">
+        <span id="media-modal-title">Evidence Player</span>
+        <button style="border:none; background:transparent; font-size:1.3rem; cursor:pointer;" onclick="closeMediaModal()">&times;</button>
+      </div>
+      <div id="media-container" style="margin: 14px 0;"></div>
+      <button class="btn-primary" style="width: 100%;" onclick="closeMediaModal()">Close Evidence</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    // Verification: Agar normal admin hai toh no principal strip!
+    const adminUser = enforceSession('admin', 'admin_login.html');
+
+    // CHECK IF INSPECTED BY PRINCIPAL (Strict condition check)
+    const isPrincipalInspecting = sessionStorage.getItem('gpm_principal') && sessionStorage.getItem('gpm_inspection_active') === 'true';
+    if (isPrincipalInspecting) {
+      const pStrip = document.getElementById('principal-inspection-strip');
+      if (pStrip) pStrip.style.display = 'flex';
+    }
+
+    async function loadData() {
+      const res = await sendRequest('/admin/data');
+      if (!res.ok) return;
+
+      const { students, grievances } = res.data;
+      window.masterStudents = students || [];
+      window.masterGrievances = grievances || [];
+      document.getElementById('total-count').innerText = window.masterStudents.length;
+
+      renderStudentTable(window.masterStudents);
+      renderGrievanceTable(window.masterGrievances);
+    }
+
+    function renderStudentTable(students) {
+      const tbl = document.getElementById('tbl-master');
+      tbl.innerHTML = '';
+
+      if (students.length === 0) {
+        tbl.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#64748b; padding:20px;">No students found matching your criteria.</td></tr>';
+        return;
+      }
+
+      students.forEach((s, idx) => {
+        const fineText = s.fine_due > 0 ? `<strong style="color:#b91c1c;">₹${s.fine_due}</strong>` : `<span style="color:#16a34a; font-weight:700;">₹0 (Clear)</span>`;
+
+        tbl.innerHTML += `
+          <tr>
+            <td><strong>${s.roll}</strong></td>
+            <td><strong>${s.name}</strong></td>
+            <td><strong>${s.hostel_code || 'BH-01'}</strong> | Room: <strong>${s.room || '--'}</strong> (Bed: ${s.bed || '--'})</td>
+            <td><code>${s.email}</code></td>
+            <td>
+              <div class="pwd-badge">
+                <span id="p-text-${idx}">••••••••</span>
+                <i class="fa-solid fa-eye" style="cursor:pointer;" onclick="togglePass(${idx}, '${s.current_password}')" id="eye-${idx}"></i>
+              </div>
+            </td>
+            <td>${fineText}</td>
+            <td>
+              <button class="btn-sm" style="background:#0d1e38;" onclick="openEditRecordModal(${idx})"><i class="fa-solid fa-pen"></i> Edit</button>
+              <button class="btn-sm" style="background:#475569;" onclick="openPwdModal(${idx})"><i class="fa-solid fa-key"></i> Pass</button>
+              <button class="btn-sm btn-fine" onclick="openFineModal(${idx})"><i class="fa-solid fa-indian-rupee-sign"></i> Fine</button>
+              <button class="btn-danger-tiny" title="Careful: Delete Student Permanently" onclick="deleteStudentSafely('${s.roll}', '${s.name}')"><i class="fa-solid fa-trash"></i></button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function filterStudents() {
+      const query = (document.getElementById('filter-search').value || '').toLowerCase().trim();
+      const hostel = (document.getElementById('filter-hostel').value || '').toUpperCase();
+
+      const filtered = window.masterStudents.filter(s => {
+        const matchesQuery = (s.name || '').toLowerCase().includes(query) ||
+                             (s.roll || '').toLowerCase().includes(query) ||
+                             (s.room || '').toLowerCase().includes(query) ||
+                             (s.email || '').toLowerCase().includes(query);
+        const matchesHostel = !hostel || (s.hostel_code || '').toUpperCase() === hostel;
+        return matchesQuery && matchesHostel;
+      });
+
+      renderStudentTable(filtered);
+    }
+
+    function renderGrievanceTable(grievances) {
+      const grTbl = document.getElementById('tbl-admin-grievances');
+      grTbl.innerHTML = '';
+      document.getElementById('gr-count').innerText = grievances.length;
+
+      if (grievances.length === 0) {
+        grTbl.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#64748b; padding:18px;">No complaints lodged. Clean hostel record!</td></tr>';
+        return;
+      }
+
+      grievances.forEach(g => {
+        let beforeProof = '<span style="color:#94a3b8; font-size:0.75rem;">None</span>';
+        if (g.photo_base64) {
+          if (g.photo_base64.startsWith('data:video')) {
+            beforeProof = `<button class="btn-sm" style="background:#0284c7;" onclick="openMediaPreview('${g.photo_base64}', 'video')"><i class="fa-solid fa-video"></i> Video</button>`;
+          } else {
+            beforeProof = `<img src="${g.photo_base64}" class="thumb-proof" onclick="openMediaPreview('${g.photo_base64}', 'image')" title="Click to view full photo">`;
+          }
+        }
+
+        let afterProof = '<span style="color:#94a3b8; font-size:0.75rem;">Awaiting</span>';
+        if (g.after_proof) {
+          afterProof = `<img src="${g.after_proof}" class="thumb-proof" style="border:2px solid #16a34a;" onclick="openMediaPreview('${g.after_proof}', 'image')" title="After Resolution Proof">`;
+        }
+
+        let audioBtn = '';
+        if (g.audio_base64) {
+          audioBtn = `<div><button type="button" class="btn-audio-listen" onclick="openAudioPlayer('${g.audio_base64}', '${g.ticket_id}')"><i class="fa-solid fa-volume-high"></i> Play Audio Clip</button></div>`;
+        }
+
+        let dbText = (g.db_level && g.db_level > 0) ? `<div style="margin-top:2px;"><span class="db-badge">🎙️ ${g.db_level} dB</span></div>` : '';
+
+        let statusBadge = `<span class="status-pill pill-reported">${g.status || 'Reported'}</span>`;
+        if (g.status === 'In Progress') statusBadge = `<span class="status-pill pill-progress">In Progress</span>`;
+        if (g.status === 'Resolved') statusBadge = `<span class="status-pill pill-resolved">Resolved</span>`;
+
+        let workflowHtml = '';
+        if (g.status === 'Resolved') {
+          workflowHtml = `<strong style="color:#16a34a;"><i class="fa-solid fa-circle-check"></i> ${g.assigned_worker_name || 'Resolved'}</strong><br><small style="color:#64748b;">${g.resolved_at || ''}</small>`;
+        } else {
+          workflowHtml = `
+            <div style="display:flex; flex-direction:column; gap:6px;">
+              <select onchange="handleTaskAction('${g.ticket_id}', this.value)" style="padding:5px 8px; border-radius:4px; font-size:0.78rem; border:1px solid #cbd5e1; background:#fff;">
+                <option value="">— Take Action / Assign —</option>
+                <optgroup label="Electricians (App Available)">
+                  <option value="worker_shailee">Shailee Kumar (Lead Elec)</option>
+                  <option value="worker_ranjeet">Ranjeet Kumar (Elec)</option>
+                  <option value="worker_amit">Amit Kumar (Elec & Sanit)</option>
+                </optgroup>
+                <optgroup label="Offline / Staff Called (No App)">
+                  <option value="OFFLINE_SWEEPER">Cleaning Staff / Sweeper (Called)</option>
+                  <option value="OFFLINE_PLUMBER">Campus Plumber (Called)</option>
+                  <option value="DIRECT_PROGRESS">Mark In Progress (General)</option>
+                </optgroup>
+              </select>
+              <button class="btn-sm" style="background:#16a34a; justify-content:center; padding:4px;" onclick="directAdminResolve('${g.ticket_id}')">
+                <i class="fa-solid fa-check"></i> Mark Resolved Directly
+              </button>
+            </div>
+          `;
+          if (g.assigned_worker_name) {
+            workflowHtml = `<div style="margin-bottom:4px; font-weight:700; color:#0369a1; font-size:0.76rem;"><i class="fa-solid fa-person-digging"></i> Assigned: ${g.assigned_worker_name}</div>` + workflowHtml;
+          }
+        }
+
+        let feedbackHtml = '<span style="color:#94a3b8;">--</span>';
+        if (g.feedback) {
+          feedbackHtml = `
+            <div style="background:#fefce8; padding:6px 10px; border-radius:6px; border:1px solid #fef08a;">
+              <span style="color:#ca8a04; font-weight:800; font-size:0.9rem;">${'★'.repeat(g.feedback.rating)}</span>
+              <div style="color:#166534; font-weight:600; font-size:0.78rem; margin-top:2px;">"${g.feedback.review}"</div>
+            </div>
+          `;
+        }
+
+        grTbl.innerHTML += `
+          <tr>
+            <td><strong>${g.ticket_id}</strong><br><small style="color:#64748b;">${g.timestamp}</small><br>${statusBadge}</td>
+            <td><strong>${g.name}</strong><br><small style="color:#64748b;">${g.roll}</small></td>
+            <td><strong style="color:#0a192f;">${g.hostel || 'BH-01'}</strong><br><small style="font-weight:700; color:#475569;">${g.room || '--'}</small></td>
+            <td><strong style="color:#0a192f;">${g.category}</strong><br><small style="color:#475569;">${g.description}</small></td>
+            <td>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <div><small style="display:block; font-size:0.65rem; color:#64748b; font-weight:700;">BEFORE</small>${beforeProof}</div>
+                <div><small style="display:block; font-size:0.65rem; color:#16a34a; font-weight:700;">AFTER</small>${afterProof}</div>
+              </div>
+              ${audioBtn}
+              ${dbText}
+            </td>
+            <td>${workflowHtml}</td>
+            <td>${feedbackHtml}</td>
+          </tr>
+        `;
+      });
+    }
+
+    function exportStudentsCSV() {
+      if (!window.masterStudents || window.masterStudents.length === 0) {
+        alert("No student records available to export!");
+        return;
+      }
+      const headers = ["Roll Number", "Student Name", "Hostel Building", "Room Number", "Bed Number", "Table Number", "Email ID", "Password", "Contact", "Guardian Contact", "District", "Status", "Fine Due"];
+      const rows = window.masterStudents.map(s => [
+        `"${s.roll || ''}"`, `"${s.name || ''}"`, `"${s.hostel_code || 'BH-01'}"`, `"${s.room || ''}"`,
+        `"${s.bed || ''}"`, `"${s.table_no || ''}"`, `"${s.email || ''}"`, `"${s.current_password || ''}"`,
+        `"${s.contact || ''}"`, `"${s.guardian_contact || ''}"`, `"${s.district || ''}"`, `"${s.status || 'Approved'}"`,
+        `"${s.fine_due || 0}"`
+      ]);
+      downloadCSVFile(headers, rows, `GPM_Hostel_Students_Master_${new Date().toISOString().slice(0,10)}.csv`);
+    }
+
+    function exportGrievancesCSV() {
+      if (!window.masterGrievances || window.masterGrievances.length === 0) {
+        alert("No grievance records available to export!");
+        return;
+      }
+      const headers = ["Ticket ID", "Student Name", "Roll Number", "Hostel Building", "Room / Area", "Category", "Description", "Noise dB Level", "Status", "Assigned Staff", "Resolved Notes", "Rating", "Review", "Logged At"];
+      const rows = window.masterGrievances.map(g => [
+        `"${g.ticket_id || ''}"`, `"${g.name || ''}"`, `"${g.roll || ''}"`, `"${g.hostel || 'BH-01'}"`,
+        `"${g.room || ''}"`, `"${g.category || ''}"`, `"${(g.description || '').replace(/"/g, '""')}"`,
+        `"${g.db_level || 0}"`, `"${g.status || 'Reported'}"`, `"${g.assigned_worker_name || 'Unassigned'}"`,
+        `"${(g.resolved_notes || '').replace(/"/g, '""')}"`, `"${g.feedback ? g.feedback.rating : ''}"`,
+        `"${g.feedback ? (g.feedback.review || '').replace(/"/g, '""') : ''}"`, `"${g.timestamp || ''}"`
+      ]);
+      downloadCSVFile(headers, rows, `GPM_Hostel_Complaints_Report_${new Date().toISOString().slice(0,10)}.csv`);
+    }
+
+    function downloadCSVFile(headers, rows, filename) {
+      const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(e => e.join(","))].join("\r\n");
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    function openFineModal(idx) {
+      const s = window.masterStudents[idx];
+      document.getElementById('fine-roll').value = s.roll;
+      document.getElementById('fine-name').value = `${s.name} (${s.roll})`;
+      document.getElementById('fine-val').value = s.fine_due || 0;
+      document.getElementById('fine-reason').value = '';
+      document.getElementById('modal-fine').classList.remove('hidden');
+    }
+
+    async function handleFineSubmit(e) {
+      e.preventDefault();
+      const roll = document.getElementById('fine-roll').value;
+      const fine_amount = parseFloat(document.getElementById('fine-val').value) || 0;
+      const reason = document.getElementById('fine-reason').value.trim();
+
+      const res = await sendRequest('/admin/update-fine', 'POST', { roll, fine_amount, reason });
+      alert(res.data.message);
+      if (res.ok) {
+        closeModal('modal-fine');
+        loadData();
+      }
+    }
+
+    async function deleteStudentSafely(roll, name) {
+      const confirmation = prompt(`⚠️ DANGER ZONE: Are you sure you want to delete ${name}?\n\nTo confirm, type student Roll Number exactly below:`, "");
+      if (confirmation === roll) {
+        const res = await sendRequest('/admin/delete-student', 'POST', { roll });
+        alert(res.data.message);
+        loadData();
+      } else if (confirmation !== null) {
+        alert("Roll number did not match. Deletion cancelled safely!");
+      }
+    }
+
+    async function handleTaskAction(ticketId, actionVal) {
+      if (!actionVal) return;
+      let workerId = actionVal;
+      let workerName = null;
+
+      if (actionVal === 'OFFLINE_SWEEPER') {
+        workerName = 'Campus Sweeper / Safai Karamchari (Phone Call)';
+      } else if (actionVal === 'OFFLINE_PLUMBER') {
+        workerName = 'Hostel Plumber (Phone Call)';
+      } else if (actionVal === 'DIRECT_PROGRESS') {
+        workerName = 'Hostel Ground Team (In Progress)';
+      }
+
+      const res = await sendRequest('/admin/assign-task', 'POST', { ticket_id: ticketId, worker_id: workerId, worker_name: workerName });
+      if (res.ok) { alert(res.data.message); loadData(); }
+    }
+
+    async function directAdminResolve(ticketId) {
+      const remarks = prompt("Enter resolution notes (e.g. Cleaned / Repaired):", "Resolved by Admin Office via Offline Staff.");
+      if (remarks === null) return;
+      const res = await sendRequest('/admin/resolve-grievance-direct', 'POST', { ticket_id: ticketId, remarks: remarks.trim() || "Resolved by Admin Office" });
+      if (res.ok) { alert(res.data.message); loadData(); }
+    }
+
+    function togglePass(idx, pass) {
+      const span = document.getElementById(`p-text-${idx}`);
+      const eye = document.getElementById(`eye-${idx}`);
+      if (span.innerText === '••••••••') {
+        span.innerText = pass;
+        eye.className = 'fa-solid fa-eye-slash';
+      } else {
+        span.innerText = '••••••••';
+        eye.className = 'fa-solid fa-eye';
+      }
+    }
+
+    function openMediaPreview(src, type) {
+      const container = document.getElementById('media-container');
+      document.getElementById('media-modal-title').innerText = "Visual Evidence Preview";
+      if (type === 'video' || src.startsWith('data:video')) {
+        container.innerHTML = `<video src="${src}" controls autoplay style="width:100%; max-height:440px; border-radius:6px;"></video>`;
+      } else {
+        container.innerHTML = `<img src="${src}" style="width:100%; max-height:440px; object-fit:contain; border-radius:6px;">`;
+      }
+      document.getElementById('modal-media-view').classList.remove('hidden');
+    }
+
+    function openAudioPlayer(audioBase64, ticketId) {
+      const container = document.getElementById('media-container');
+      document.getElementById('media-modal-title').innerText = `Noise & Sound Evidence (${ticketId})`;
+      container.innerHTML = `
+        <div style="background:#f8fafc; padding:20px; border-radius:8px; border:1px solid #cbd5e1;">
+          <div style="font-size:2.5rem; color:#7c3aed; margin-bottom:12px;"><i class="fa-solid fa-headphones-simple"></i></div>
+          <p style="font-size:0.85rem; color:#475569; margin-bottom:14px; font-weight:600;">Play student's recorded audio clip to verify disturbance:</p>
+          <audio src="${audioBase64}" controls autoplay style="width:100%; outline:none;"></audio>
+        </div>
+      `;
+      document.getElementById('modal-media-view').classList.remove('hidden');
+    }
+
+    function closeMediaModal() {
+      const container = document.getElementById('media-container');
+      container.innerHTML = '';
+      document.getElementById('modal-media-view').classList.add('hidden');
+    }
+
+    async function uploadExcel() {
+      const fileInput = document.getElementById("excel-file");
+      if (!fileInput.files || fileInput.files.length === 0) {
+        alert("Please select an Excel (.xlsx, .xls, .csv) file first.");
+        return;
+      }
+      const btn = document.getElementById("btn-up-excel");
+      btn.innerText = "Importing...";
+      btn.disabled = true;
+
+      const fd = new FormData();
+      fd.append("file", fileInput.files[0]);
+
+      const res = await fetch("http://127.0.0.1:5000/api/admin/upload-excel", { method: "POST", body: fd });
+      const data = await res.json();
+      btn.innerHTML = `<i class="fa-solid fa-file-excel"></i> Upload Sir's Excel Sheet`;
+      btn.disabled = false;
+
+      alert(data.message);
+      fileInput.value = "";
+      loadData();
+    }
+
+    function openAddStudentModal() { document.getElementById('modal-add').classList.remove('hidden'); }
+    async function handleAddSubmit(e) {
+      e.preventDefault();
+      const payload = {
+        roll: document.getElementById('add-roll').value.trim(),
+        name: document.getElementById('add-name').value.trim(),
+        hostel_code: document.getElementById('add-hostel').value,
+        room: document.getElementById('add-room').value.trim(),
+        bed: document.getElementById('add-bed').value.trim(),
+        table_no: document.getElementById('add-table').value.trim(),
+        contact: document.getElementById('add-contact').value.trim(),
+        password: document.getElementById('add-pwd').value.trim()
+      };
+      const res = await sendRequest('/admin/add-student', 'POST', payload);
+      alert(res.data.message);
+      if (res.ok) { closeModal('modal-add'); loadData(); e.target.reset(); }
+    }
+
+    function openEditRecordModal(idx) {
+      const s = window.masterStudents[idx];
+      document.getElementById('edit-roll').value = s.roll;
+      document.getElementById('edit-name').value = s.name;
+      document.getElementById('edit-hostel').value = s.hostel_code || 'BH-01';
+      document.getElementById('edit-room').value = s.room || '';
+      document.getElementById('edit-bed').value = s.bed || '';
+      document.getElementById('edit-table').value = s.table_no || '';
+      document.getElementById('edit-contact').value = s.contact || '';
+      document.getElementById('edit-status').value = s.status || 'Approved';
+      document.getElementById('modal-edit').classList.remove('hidden');
+    }
+
+    async function handleEditRecord(e) {
+      e.preventDefault();
+      const payload = {
+        roll: document.getElementById('edit-roll').value,
+        name: document.getElementById('edit-name').value.trim(),
+        hostel_code: document.getElementById('edit-hostel').value,
+        room: document.getElementById('edit-room').value.trim(),
+        bed: document.getElementById('edit-bed').value.trim(),
+        table_no: document.getElementById('edit-table').value.trim(),
+        contact: document.getElementById('edit-contact').value.trim(),
+        status: document.getElementById('edit-status').value
+      };
+      const res = await sendRequest('/admin/edit-student', 'POST', payload);
+      alert(res.data.message);
+      closeModal('modal-edit');
+      loadData();
+    }
+
+    function openPwdModal(idx) {
+      const s = window.masterStudents[idx];
+      document.getElementById('pwd-roll').value = s.roll;
+      document.getElementById('pwd-name').value = `${s.name} (${s.roll})`;
+      document.getElementById('pwd-val').value = s.current_password;
+      document.getElementById('modal-pwd').classList.remove('hidden');
+    }
+
+    async function handlePwdSubmit(e) {
+      e.preventDefault();
+      const roll = document.getElementById('pwd-roll').value;
+      const new_password = document.getElementById('pwd-val').value.trim();
+      const res = await sendRequest('/admin/change-student-password', 'POST', { roll, new_password });
+      alert(res.data.message);
+      closeModal('modal-pwd');
+      loadData();
+    }
+
+    async function deleteStudent(roll) {
+      if (confirm(`Are you sure you want to delete student ${roll}? This will permanently remove their records.`)) {
+        const res = await sendRequest('/admin/delete-student', 'POST', { roll });
+        alert(res.data.message);
+        loadData();
+      }
+    }
+
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+    loadData();
+  </script>
+</body>
+</html>

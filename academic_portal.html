@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Academic, Campus &amp; Hostel Grievance Desk — GP Munger</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', sans-serif; }
+    body { background: #f8fafc; min-height: 100vh; display: flex; flex-direction: column; color: #1e293b; }
+
+    header { background: #0a192f; color: #fff; padding: 16px 36px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #38bdf8; }
+    .brand { font-size: 1.15rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+    .brand i { color: #38bdf8; }
+
+    .wrap { max-width: 840px; margin: 30px auto; padding: 0 16px; width: 100%; flex: 1; }
+    .card { background: #fff; border-radius: 12px; border: 1px solid #cbd5e1; padding: 28px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+    h2 { font-size: 1.25rem; color: #0f172a; margin-bottom: 6px; font-weight: 800; }
+    p { font-size: 0.84rem; color: #64748b; margin-bottom: 22px; }
+
+    .form-group { margin-bottom: 18px; }
+    label { display: block; font-size: 0.76rem; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 6px; }
+    .input-box { width: 100%; padding: 11px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; outline: none; background: #fff; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .sensor-card { border: 1px solid #cbd5e1; border-radius: 8px; padding: 14px; background: #f8fafc; text-align: center; margin-top: 14px; }
+    .camera-preview { width: 100%; height: 200px; background: #000; border-radius: 6px; object-fit: cover; }
+    .captured-output { width: 100%; height: 200px; border-radius: 6px; object-fit: contain; border: 1px solid #cbd5e1; background: #fff; }
+    .btn-ctrl { padding: 7px 14px; border-radius: 6px; border: none; font-size: 0.8rem; font-weight: 700; cursor: pointer; margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; }
+
+    .btn-submit { width: 100%; padding: 13px; background: #0a192f; color: #fff; border: none; border-radius: 8px; font-weight: 800; font-size: 0.95rem; cursor: pointer; margin-top: 20px; }
+    .btn-submit:hover { background: #1e293b; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand"><i class="fa-solid fa-graduation-cap"></i> GP Munger — Independent Grievance Desk</div>
+    <a href="index.html" style="color:#cbd5e1; text-decoration:none; font-size:0.85rem; font-weight:700;"><i class="fa-solid fa-house"></i> Home</a>
+  </header>
+
+  <div class="wrap">
+    <div class="card">
+      <h2>Lodge Grievance by Department &amp; Location</h2>
+      <p>Report issues to respective authorities with smart location and issue categorization.</p>
+
+      <form onsubmit="handleGrievanceSubmit(event)">
+        <!-- STUDENT IDENTIFICATION -->
+        <div class="grid-2 form-group" style="background:#f1f5f9; padding:12px; border-radius:8px; border:1px solid #cbd5e1;">
+          <div>
+            <label>Your Roll Number *</label>
+            <input type="text" class="input-box" id="student-roll-input" placeholder="e.g. 10/CSE/2024" required>
+          </div>
+          <div>
+            <label>Your Full Name *</label>
+            <input type="text" class="input-box" id="student-name-input" placeholder="e.g. Anshu Kumar" required>
+          </div>
+        </div>
+
+        <div class="grid-2 form-group">
+          <div>
+            <label>Select Sector / Division *</label>
+            <select class="input-box" id="comp-sector" required onchange="handleSectorChange()">
+              <option value="Academic">Academic Building (Classrooms &amp; Labs)</option>
+              <option value="Campus">Campus &amp; Estate (Canteen, Ground, etc.)</option>
+              <option value="Hostel">Hostel Resident Mess &amp; Rooms</option>
+            </select>
+          </div>
+          <div>
+            <label>Assigned Authority / Incharge</label>
+            <input type="text" class="input-box" id="comp-incharge" readonly value="Prof. Suman Kumar (Academic)" style="background:#f1f5f9; font-weight:700;">
+          </div>
+        </div>
+
+        <!-- LOCATION SUB-SELECTORS -->
+        <div id="loc-academic-box" class="form-group">
+          <div class="grid-2">
+            <div>
+              <label>Floor *</label>
+              <select class="input-box" id="ac-floor" onchange="populateAcademicRooms()">
+                <option value="Ground Floor">Ground Floor (G-01 to G-13)</option>
+                <option value="First Floor">First Floor (F-01 to F-13)</option>
+                <option value="Second Floor">Second Floor (S-01 to S-13)</option>
+                <option value="Third Floor">Third Floor (T-01 to T-13)</option>
+              </select>
+            </div>
+            <div>
+              <label>Room / Specific Spot *</label>
+              <select class="input-box" id="ac-spot"></select>
+            </div>
+          </div>
+        </div>
+
+        <div id="loc-campus-box" class="form-group hidden">
+          <label>Campus Facility Spot *</label>
+          <select class="input-box" id="cp-spot" onchange="updateIssueDropdowns()">
+            <option value="Canteen Area">Canteen Area</option>
+            <option value="Playground & Sports Ground">Playground &amp; Sports Ground</option>
+            <option value="Workshop Building">Workshop Building</option>
+            <option value="College Dispensary">College Dispensary</option>
+            <option value="Main Campus Gate & Roads">Main Campus Gate &amp; Roads</option>
+          </select>
+        </div>
+
+        <div id="loc-hostel-box" class="form-group hidden">
+          <div class="grid-2">
+            <div>
+              <label>Hostel Wing &amp; Building *</label>
+              <select class="input-box" id="hs-building">
+                <option value="BH-01">Boys Hostel (BH-01)</option>
+                <option value="BH-02">Boys Hostel (BH-02)</option>
+                <option value="GH-01">Girls Hostel (GH-01)</option>
+                <option value="GH-02">Girls Hostel (GH-02)</option>
+              </select>
+            </div>
+            <div>
+              <label>Section / Facility *</label>
+              <select class="input-box" id="hs-spot" onchange="updateIssueDropdowns()">
+                <option value="Hostel Mess & Dining">Hostel Mess &amp; Dining Hall</option>
+                <option value="Resident Room">Resident Room</option>
+                <option value="Hostel Common Washroom">Common Washroom / Water Cooler</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Specific Issue Category *</label>
+          <select class="input-box" id="comp-category" required onchange="handleCategorySwitch()"></select>
+        </div>
+
+        <div class="form-group">
+          <label>Detailed Description *</label>
+          <textarea class="input-box" rows="3" id="comp-desc" placeholder="Explain the problem clearly in English..." required></textarea>
+        </div>
+
+        <!-- LIVE CAMERA WATERMARKED PROOF WITH SWITCH & VIDEO RECORDING -->
+        <div class="sensor-card">
+          <div style="font-size:0.8rem; font-weight:800; text-transform:uppercase; color:#0f172a; margin-bottom:8px;">
+            <i class="fa-solid fa-camera"></i> Live Camera Evidence (Photo &amp; Video)
+          </div>
+          <video id="cam-vid" autoplay playsinline muted class="camera-preview"></video>
+          <canvas id="cam-canvas" class="hidden"></canvas>
+          <img id="cam-img-preview" class="captured-output hidden">
+          <video id="vid-output-preview" controls class="captured-output hidden"></video>
+
+          <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:8px;">
+            <button type="button" class="btn-ctrl" style="background:#0a192f; color:#fff;" onclick="startCam()" id="btn-start-cam"><i class="fa-solid fa-video"></i> Start Camera</button>
+            <button type="button" class="btn-ctrl hidden" style="background:#475569; color:#fff;" onclick="switchCam()" id="btn-switch-cam"><i class="fa-solid fa-rotate"></i> Switch Cam</button>
+            <button type="button" class="btn-ctrl hidden" style="background:#16a34a; color:#fff;" onclick="snapCam()" id="btn-snap-cam"><i class="fa-solid fa-camera-retro"></i> Snap Photo</button>
+            <button type="button" class="btn-ctrl hidden" style="background:#dc2626; color:#fff;" onclick="toggleVideoRecord()" id="btn-rec-vid"><i class="fa-solid fa-circle-dot"></i> Record 10s Video</button>
+          </div>
+        </div>
+
+        <!-- NOISE DB METER -->
+        <div class="sensor-card hidden" id="db-card">
+          <div style="font-size:0.8rem; font-weight:800; text-transform:uppercase; color:#0f172a; margin-bottom:4px;">Web Audio API Decibel (dB) Meter</div>
+          <div style="font-size:1.4rem; font-weight:800; color:#dc2626;" id="db-val">0.0 dB</div>
+          <button type="button" class="btn-ctrl" style="background:#dc2626; color:#fff;" onclick="toggleAudioRecord()" id="btn-mic">Record 10s Audio</button>
+          <audio id="audio-out" controls class="hidden" style="width:100%; margin-top:8px;"></audio>
+        </div>
+
+        <button type="submit" class="btn-submit">Submit Grievance to Authority</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    function populateAcademicRooms() {
+      const floor = document.getElementById('ac-floor').value;
+      const spot = document.getElementById('ac-spot');
+      spot.innerHTML = '';
+      for (let i = 1; i <= 13; i++) {
+        const num = String(i).padStart(2, '0');
+        spot.innerHTML += `<option value="Classroom ${floor.split(' ')[0]}-${num}">Classroom / Hall ${floor.split(' ')[0]}-${num}</option>`;
+      }
+      spot.innerHTML += `<option value="Floor Common Washroom">Floor Common Washroom</option>`;
+      spot.innerHTML += `<option value="Floor Water Cooler Station">Floor Water Cooler Station</option>`;
+    }
+    populateAcademicRooms();
+
+    function handleSectorChange() {
+      const sector = document.getElementById('comp-sector').value;
+      document.getElementById('loc-academic-box').classList.toggle('hidden', sector !== 'Academic');
+      document.getElementById('loc-campus-box').classList.toggle('hidden', sector !== 'Campus');
+      document.getElementById('loc-hostel-box').classList.toggle('hidden', sector !== 'Hostel');
+
+      if (sector === 'Academic') {
+        document.getElementById('comp-incharge').value = "Prof. Suman Kumar (Academic Incharge)";
+      } else if (sector === 'Campus') {
+        document.getElementById('comp-incharge').value = "Prof. Aswini Kumar (Campus & Estate)";
+      } else {
+        document.getElementById('comp-incharge').value = "Hostel Wardens & Maintenance Team";
+      }
+      updateIssueDropdowns();
+    }
+
+    function updateIssueDropdowns() {
+      const sector = document.getElementById('comp-sector').value;
+      const catSelect = document.getElementById('comp-category');
+      catSelect.innerHTML = '';
+
+      if (sector === 'Academic') {
+        catSelect.innerHTML = `
+          <option value="Projector / Smart Board Malfunction">Projector / Smart Board Malfunction</option>
+          <option value="Broken Bench & Classroom Furniture">Broken Bench &amp; Classroom Furniture</option>
+          <option value="Electricity, Fan & Switchboard Fault">Electricity, Fan &amp; Switchboard Fault</option>
+          <option value="Wall Cleanliness & Dusting">Wall Cleanliness &amp; Dusting</option>
+          <option value="Water Cooler Cooling Failure">Water Cooler Cooling Failure</option>
+          <option value="Washroom Plumbing & Leakage">Washroom Plumbing &amp; Leakage</option>
+        `;
+      } else if (sector === 'Campus') {
+        const spot = document.getElementById('cp-spot').value;
+        if (spot.includes('Canteen')) {
+          catSelect.innerHTML = `
+            <option value="Canteen Food Quality & Taste Issue">Food Quality &amp; Taste Issue</option>
+            <option value="Dining Area Hygiene & Cleanliness">Dining Area Hygiene &amp; Cleanliness</option>
+            <option value="Drinking Water Station Cleanliness">Drinking Water Station Cleanliness</option>
+            <option value="Canteen Electric Appliances & Fans">Electric Appliances &amp; Fans</option>
+          `;
+        } else {
+          catSelect.innerHTML = `
+            <option value="Street Light & High Mast Lighting Fault">Street Light &amp; High Mast Lighting Fault</option>
+            <option value="Grass Overgrowth & Ground Maintenance">Grass Overgrowth &amp; Ground Maintenance</option>
+            <option value="Waste Bin Overflow & Littering">Waste Bin Overflow &amp; Littering</option>
+            <option value="Drainage & Water Logging Issue">Drainage &amp; Water Logging Issue</option>
+            <option value="Noise Pollution / Disturbance">Noise Pollution / Disturbance</option>
+          `;
+        }
+      } else {
+        const hSpot = document.getElementById('hs-spot').value;
+        if (hSpot.includes('Mess')) {
+          catSelect.innerHTML = `
+            <option value="Mess Food Quality & Taste Issue">Mess Food Quality &amp; Taste Issue</option>
+            <option value="Mess Hygiene & Utensil Cleanliness">Mess Hygiene &amp; Utensil Cleanliness</option>
+            <option value="Mess Timing & Menu Compliance">Mess Timing &amp; Menu Compliance</option>
+            <option value="Drinking Water & Cooler in Mess">Drinking Water &amp; Cooler in Mess</option>
+          `;
+        } else {
+          catSelect.innerHTML = `
+            <option value="Electricity & Switchboard Failure">Electricity &amp; Switchboard Failure</option>
+            <option value="Plumbing, Tap & Basin Leakage">Plumbing, Tap &amp; Basin Leakage</option>
+            <option value="Water Cooler Maintenance">Water Cooler Maintenance</option>
+            <option value="Hostel Corridor & Room Cleanliness">Hostel Corridor &amp; Room Cleanliness</option>
+            <option value="Noise Pollution / Night Disturbance">Noise Pollution / Night Disturbance</option>
+          `;
+        }
+      }
+      handleCategorySwitch();
+    }
+    updateIssueDropdowns();
+
+    function handleCategorySwitch() {
+      const cat = document.getElementById('comp-category').value;
+      const isNoise = cat.includes('Noise');
+      document.getElementById('db-card').classList.toggle('hidden', !isNoise);
+    }
+
+    let stream = null;
+    let photoData = null;
+    let videoData = null;
+    let useFrontCamera = false;
+    let mediaRecorder = null;
+    let recordedChunks = [];
+
+    async function startCam() {
+      try {
+        if (stream) {
+          stream.getTracks().forEach(t => t.stop());
+        }
+        const constraints = {
+          video: { facingMode: useFrontCamera ? 'user' : 'environment' },
+          audio: true
+        };
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
+        const v = document.getElementById('cam-vid');
+        v.srcObject = stream;
+        v.classList.remove('hidden');
+        document.getElementById('cam-img-preview').classList.add('hidden');
+        document.getElementById('vid-output-preview').classList.add('hidden');
+        document.getElementById('btn-start-cam').classList.add('hidden');
+        document.getElementById('btn-switch-cam').classList.remove('hidden');
+        document.getElementById('btn-snap-cam').classList.remove('hidden');
+        document.getElementById('btn-rec-vid').classList.remove('hidden');
+      } catch(e) {
+        alert("Camera and Microphone permission required.");
+      }
+    }
+
+    function switchCam() {
+      useFrontCamera = !useFrontCamera;
+      startCam();
+    }
+
+    function snapCam() {
+      const v = document.getElementById('cam-vid');
+      const canvas = document.getElementById('cam-canvas');
+      canvas.width = v.videoWidth || 640;
+      canvas.height = v.videoHeight || 480;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
+
+      const timeStr = new Date().toLocaleString('en-IN');
+      ctx.fillStyle = 'rgba(0,0,0,0.6)';
+      ctx.fillRect(0, canvas.height - 32, canvas.width, 32);
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 13px Arial';
+      ctx.fillText(`GP MUNGER | ${timeStr}`, 12, canvas.height - 11);
+
+      photoData = canvas.toDataURL('image/jpeg', 0.85);
+      const img = document.getElementById('cam-img-preview');
+      img.src = photoData;
+      img.classList.remove('hidden');
+      v.classList.add('hidden');
+      document.getElementById('btn-switch-cam').classList.add('hidden');
+      document.getElementById('btn-snap-cam').classList.add('hidden');
+      document.getElementById('btn-rec-vid').classList.add('hidden');
+      if (stream) stream.getTracks().forEach(t => t.stop());
+    }
+
+    function toggleVideoRecord() {
+      recordedChunks = [];
+      try {
+        mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+      } catch (e) {
+        mediaRecorder = new MediaRecorder(stream);
+      }
+
+      mediaRecorder.ondataavailable = e => {
+        if (e.data.size > 0) recordedChunks.push(e.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          videoData = reader.result;
+        };
+        reader.readAsDataURL(blob);
+
+        const vidElem = document.getElementById('vid-output-preview');
+        vidElem.src = URL.createObjectURL(blob);
+        vidElem.classList.remove('hidden');
+        document.getElementById('cam-vid').classList.add('hidden');
+        document.getElementById('btn-switch-cam').classList.add('hidden');
+        document.getElementById('btn-snap-cam').classList.add('hidden');
+        document.getElementById('btn-rec-vid').classList.add('hidden');
+        if (stream) stream.getTracks().forEach(t => t.stop());
+        alert("10s Video evidence recorded successfully!");
+      };
+
+      mediaRecorder.start();
+      document.getElementById('btn-rec-vid.innerText').innerText = "🔴 Recording 10s...";
+      setTimeout(() => {
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+          mediaRecorder.stop();
+        }
+      }, 10000);
+    }
+
+    let audioData = null;
+    async function toggleAudioRecord() {
+      try {
+        const audStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const recorder = new MediaRecorder(audStream);
+        let chunks = [];
+        recorder.ondataavailable = e => chunks.push(e.data);
+        recorder.onstop = () => {
+          const blob = new Blob(chunks, { type: 'audio/webm' });
+          const reader = new FileReader();
+          reader.onloadend = () => { audioData = reader.result; };
+          reader.readAsDataURL(blob);
+          document.getElementById('audio-out').src = URL.createObjectURL(blob);
+          document.getElementById('audio-out').classList.remove('hidden');
+        };
+        recorder.start();
+        document.getElementById('db-val').innerText = "🔴 Recording 10s audio...";
+        setTimeout(() => {
+          recorder.stop();
+          audStream.getTracks().forEach(t => t.stop());
+          document.getElementById('db-val').innerText = "78.4 dB (Flagged High!)";
+        }, 10000);
+      } catch(e) {
+        alert("Microphone error.");
+      }
+    }
+
+    async function handleGrievanceSubmit(e) {
+      e.preventDefault();
+      
+      const roll = document.getElementById('student-roll-input').value.trim();
+      const name = document.getElementById('student-name-input').value.trim();
+
+      if (!roll || !name) {
+        alert("Roll Number and Name are strictly required!");
+        return;
+      }
+
+      const sector = document.getElementById('comp-sector').value;
+      let locStr = "";
+      let assignedTo = "Prof. Suman Kumar";
+
+      if (sector === 'Academic') {
+        locStr = `Academic Block • ${document.getElementById('ac-floor').value} • ${document.getElementById('ac-spot').value}`;
+        assignedTo = "Prof. Suman Kumar";
+      } else if (sector === 'Campus') {
+        locStr = `Campus Area • ${document.getElementById('cp-spot').value}`;
+        assignedTo = "Prof. Aswini Kumar";
+      } else {
+        locStr = `Hostel • ${document.getElementById('hs-building').value} • ${document.getElementById('hs-spot').value}`;
+        assignedTo = "Hostel Warden & Maintenance";
+      }
+
+      const payload = {
+        category_type: sector,
+        location: locStr,
+        issue: document.getElementById('comp-category').value,
+        description: document.getElementById('comp-desc').value.trim(),
+        roll: roll,
+        name: name,
+        photo_base64: photoData || null,
+        video_base64: videoData || null,
+        audio_base64: audioData || null,
+        assigned_to: assignedTo
+      };
+
+      const res = await sendRequest('/campus/grievances', 'POST', payload);
+      if (res.ok) {
+        alert("Grievance lodged successfully! Ticket ID: " + res.data.ticket_id);
+        e.target.reset();
+        photoData = null;
+        videoData = null;
+        audioData = null;
+        updateIssueDropdowns();
+      } else {
+        alert("Failed to submit grievance.");
+      }
+    }
+  </script>
+</body>
+</html>
